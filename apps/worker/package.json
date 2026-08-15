@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@ligat-fantasy/config": "workspace:*",
+    "@ligat-fantasy/contracts": "workspace:*",
     "@ligat-fantasy/database": "workspace:*",
     "@ligat-fantasy/football-data": "workspace:*",
     "@ligat-fantasy/scoring": "workspace:*",

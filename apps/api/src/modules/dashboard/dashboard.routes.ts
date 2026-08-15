@@ -13,11 +13,13 @@ export async function registerDashboardRoutes(app: FastifyInstance, context: App
     const team = await teams.getOrCreate(requestUserId(request));
     const gameweek = await context.db.collection<GameweekSummary>(collections.gameweeks)
       .findOne({ status: { $in: ['OPEN', 'LOCKED', 'LIVE', 'FINALIZING'] } });
+    const score = gameweek ? await context.db.collection(collections.gameweekScores)
+      .findOne({ gameweekId: gameweek.id, fantasyTeamId: team.id }) : null;
     return {
       team,
       currentGameweek: gameweek ?? { id: 'preseason', number: 1, status: 'UPCOMING', deadline: new Date().toISOString() },
-      gameweekPoints: 0,
-      provisional: gameweek?.status === 'LIVE' || gameweek?.status === 'FINALIZING',
+      gameweekPoints: Number(score?.totalPoints ?? 0),
+      provisional: Boolean(score?.provisional),
     };
   });
 }

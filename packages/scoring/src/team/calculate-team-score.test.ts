@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import type { TeamScorePlayer } from './calculate-team-score.js';
+import type { TeamScoreInput, TeamScorePlayer } from './calculate-team-score.js';
 import { calculateTeamScore } from './calculate-team-score.js';
 
 const player = (id: string, position: TeamScorePlayer['position'], points = 2, minutes = 90): TeamScorePlayer =>
   ({ id, position, points, minutes });
-const base = () => ({
+const base = (): TeamScoreInput => ({
   starters: [player('g', 'GOALKEEPER'), player('d1', 'DEFENDER'), player('d2', 'DEFENDER'),
     player('d3', 'DEFENDER'), player('m1', 'MIDFIELDER'), player('m2', 'MIDFIELDER'),
     player('m3', 'MIDFIELDER'), player('m4', 'MIDFIELDER'), player('f1', 'FORWARD'),

@@ -6,6 +6,7 @@ export async function ensureIndexes(db: Db): Promise<void> {
     db.collection(names.users).createIndex({ email: 1 }, { unique: true }),
     db.collection(names.clubs).createIndex({ 'providerIds.apiFootball': 1 }, { unique: true }),
     db.collection(names.players).createIndexes([{ key: { clubId: 1 } }, { key: { position: 1 } }]),
+    db.collection(names.players).createIndex({ 'providerIds.apiFootball': 1 }, { unique: true }),
     db.collection(names.fixtures).createIndexes([{ key: { gameweekId: 1 } }, { key: { status: 1, kickoffAt: 1 } }]),
     db.collection(names.playerMatchStats).createIndex({ fixtureId: 1, playerId: 1 }, { unique: true }),
     db.collection(names.playerMatchPoints).createIndex({ fixtureId: 1, playerId: 1 }, { unique: true }),

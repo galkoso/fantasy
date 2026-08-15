@@ -9,7 +9,8 @@
   <div><span>PLAYERS</span><strong>{{ selected().length }} <small>/ 15</small></strong></div>
   <div><span>IN THE BANK</span><strong class="lime">₪{{ budget() / 10 | number:'1.1-1' }}m</strong></div>
   <div><span>SQUAD VALUE</span><strong>₪{{ (1000 - budget()) / 10 | number:'1.1-1' }}m</strong></div>
-  <button class="save" [disabled]="selected().length !== 15">Save squad <span>→</span></button>
+  <button class="save" [disabled]="selected().length !== 15 || saving()" (click)="save()">{{ saving() ? 'Saving…' : 'Save squad' }} <span>→</span></button>
+  @if (feedback()) { <p class="feedback">{{ feedback() }}</p> }
 </section>
 
 <div class="workspace">

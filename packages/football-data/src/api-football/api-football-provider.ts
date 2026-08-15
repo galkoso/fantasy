@@ -1,21 +1,37 @@
 import type { PlayerPosition } from '@ligat-fantasy/contracts';
 import type { FootballDataProvider } from '../football-data-provider.js';
-import type { ProviderFixture, ProviderPlayerStats } from '../types.js';
-import type { ApiFixture, ApiResponse, ApiTeamStats } from './api-football.types.js';
+import type { ProviderClub, ProviderFixture, ProviderPlayer, ProviderPlayerStats } from '../types.js';
+import type { ApiClub, ApiFixture, ApiPlayer, ApiResponse, ApiTeamStats } from './api-football.types.js';
 
 export interface ApiFootballOptions { baseUrl: string; apiKey: string; leagueId: number; season: number }
 
 export class ApiFootballProvider implements FootballDataProvider {
   constructor(private readonly options: ApiFootballOptions) {}
 
-  async getFixtures(date: Date): Promise<ProviderFixture[]> {
-    const day = date.toISOString().slice(0, 10);
-    const data = await this.get<ApiFixture>(`/fixtures?league=${this.options.leagueId}&season=${this.options.season}&date=${day}`);
-    return data.map((item) => ({
-      providerId: item.fixture.id, kickoffAt: new Date(item.fixture.date), status: mapStatus(item.fixture.status.short),
-      homeClubProviderId: item.teams.home.id, awayClubProviderId: item.teams.away.id,
-      homeGoals: item.goals.home, awayGoals: item.goals.away,
-    }));
+  async getClubs(): Promise<ProviderClub[]> {
+    const data = await this.get<ApiClub>(`/teams?league=${this.options.leagueId}&season=${this.options.season}`);
+    return data.map(({ team }) => ({ providerId: team.id, name: team.name,
+      shortName: team.code ?? team.name.slice(0, 3).toUpperCase(), logoUrl: team.logo }));
+  }
+
+  async getPlayers(): Promise<ProviderPlayer[]> {
+    const path = `/players?league=${this.options.leagueId}&season=${this.options.season}`;
+    const data = await this.getAllPages<ApiPlayer>(path);
+    return data.flatMap(({ player, statistics }) => statistics[0] ? [{ providerId: player.id,
+      clubProviderId: statistics[0].team.id, name: player.name,
+      position: mapPosition(statistics[0].games.position) }] : []);
+  }
+
+  async getFixtures(date?: Date): Promise<ProviderFixture[]> {
+    const dateQuery = date ? `&date=${date.toISOString().slice(0, 10)}` : '';
+    const data = await this.get<ApiFixture>(`/fixtures?league=${this.options.leagueId}&season=${this.options.season}${dateQuery}`);
+    return data.map((item) => {
+      const gameweekNumber = roundNumber(item.league.round);
+      return { providerId: item.fixture.id, kickoffAt: new Date(item.fixture.date),
+        status: mapStatus(item.fixture.status.short), homeClubProviderId: item.teams.home.id,
+        awayClubProviderId: item.teams.away.id, homeGoals: item.goals.home,
+        awayGoals: item.goals.away, ...(gameweekNumber === undefined ? {} : { gameweekNumber }) };
+    });
   }
 
   async getPlayerStats(fixtureProviderId: number): Promise<ProviderPlayerStats[]> {
@@ -34,10 +50,36 @@ export class ApiFootballProvider implements FootballDataProvider {
   }
 
   private async get<T>(path: string): Promise<T[]> {
-    const response = await fetch(`${this.options.baseUrl}${path}`, { headers: { 'x-apisports-key': this.options.apiKey } });
-    if (!response.ok) throw new Error(`API_FOOTBALL_${response.status}`);
-    return (await response.json() as ApiResponse<T>).response;
+    return (await this.request<T>(path)).response;
   }
+
+  private async getAllPages<T>(path: string): Promise<T[]> {
+    const first = await this.request<T>(`${path}&page=1`);
+    const pages = first.paging?.total ?? 1;
+    const rest = await Promise.all(Array.from({ length: Math.max(0, pages - 1) }, (_, index) =>
+      this.request<T>(`${path}&page=${index + 2}`)));
+    return [first, ...rest].flatMap(({ response }) => response);
+  }
+
+  private async request<T>(path: string): Promise<ApiResponse<T>> {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const response = await fetch(`${this.options.baseUrl}${path}`, {
+        headers: { 'x-apisports-key': this.options.apiKey }, signal: AbortSignal.timeout(15_000),
+      });
+      if (response.ok) return await response.json() as ApiResponse<T>;
+      if (response.status !== 429 && response.status < 500) throw new Error(`API_FOOTBALL_${response.status}`);
+      if (attempt < 2) await delay(500 * 2 ** attempt);
+    }
+    throw new Error('API_FOOTBALL_RETRY_EXHAUSTED');
+  }
+}
+
+const delay = (milliseconds: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+function roundNumber(round: string): number | undefined {
+  const value = /(?:^|\D)(\d+)\s*$/.exec(round)?.[1];
+  return value ? Number(value) : undefined;
 }
 
 function mapStatus(status: string): ProviderFixture['status'] {

@@ -4,6 +4,7 @@ import type { PlayerPosition, PlayerSummary } from '@ligat-fantasy/contracts';
 import { DEMO_PLAYERS } from '../../core/demo-players';
 import { FantasyApiService } from '../../core/fantasy-api.service';
 import { PlayerCardComponent } from '../../shared/player-card/player-card.component';
+import { catchError, EMPTY, finalize, forkJoin, of, switchMap } from 'rxjs';
 
 const required: Record<PlayerPosition, number> = { GOALKEEPER: 2, DEFENDER: 5, MIDFIELDER: 5, FORWARD: 3 };
 
@@ -23,6 +24,8 @@ export class SquadBuilderComponent {
   readonly view = signal<'pitch' | 'list'>('pitch');
   readonly captainId = signal('demo-8');
   readonly viceCaptainId = signal('demo-9');
+  readonly saving = signal(false);
+  readonly feedback = signal('');
   readonly budget = computed(() => 1_000 - this.selected().reduce((sum, player) => sum + player.price, 0));
   readonly filtered = computed(() => {
     const term = this.search().toLowerCase();
@@ -31,7 +34,17 @@ export class SquadBuilderComponent {
   });
   readonly positions = ['GOALKEEPER', 'DEFENDER', 'MIDFIELDER', 'FORWARD'] as const;
 
-  constructor() { this.api.players().subscribe((players) => { if (players.length) this.available.set(players); }); }
+  constructor() {
+    forkJoin({ players: this.api.players(), team: this.api.team() }).subscribe(({ players, team }) => {
+      this.available.set(players);
+      if (!team?.squad.length) return;
+      const byId = new Map(players.map((player) => [player.id, player]));
+      const owned = team.squad.flatMap(({ playerId }) => byId.get(playerId) ?? []);
+      if (owned.length === team.squad.length) this.selected.set(owned);
+      if (team.captainPlayerId) this.captainId.set(team.captainPlayerId);
+      if (team.viceCaptainPlayerId) this.viceCaptainId.set(team.viceCaptainPlayerId);
+    });
+  }
 
   playersAt(position: PlayerPosition): PlayerSummary[] {
     return this.selected().filter((player) => player.position === position);
@@ -52,4 +65,26 @@ export class SquadBuilderComponent {
   browsePosition(position: PlayerPosition): void { this.position.set(position); }
   setSearch(event: Event): void { this.search.set((event.target as HTMLInputElement).value); }
   setPosition(event: Event): void { this.position.set((event.target as HTMLSelectElement).value as PlayerPosition | 'ALL'); }
+
+  save(): void {
+    if (this.selected().length !== 15 || this.saving()) return;
+    const starters = [...this.playersAt('GOALKEEPER').slice(0, 1), ...this.playersAt('DEFENDER').slice(0, 3),
+      ...this.playersAt('MIDFIELDER').slice(0, 4), ...this.playersAt('FORWARD').slice(0, 3)];
+    const starterIds = new Set(starters.map(({ id }) => id));
+    const bench = this.selected().filter(({ id }) => !starterIds.has(id));
+    const orderedBench = [...bench.filter(({ position }) => position === 'GOALKEEPER'),
+      ...bench.filter(({ position }) => position !== 'GOALKEEPER')];
+    const captain = starters.find(({ position }) => position === 'MIDFIELDER')!;
+    const viceCaptain = starters.find(({ position }) => position === 'FORWARD')!;
+    this.saving.set(true); this.feedback.set('');
+    this.api.saveSquad("Gal's XI", this.selected().map(({ id }) => id)).pipe(
+      switchMap(() => this.api.saveLineup(starters.map(({ id }) => id), orderedBench.map(({ id }) => id))),
+      switchMap(() => this.api.saveCaptains(captain.id, viceCaptain.id)),
+      switchMap(() => this.api.currentGameweek()),
+      switchMap((gameweek) => gameweek ? this.api.submitGameweek(gameweek.id) : of(null)),
+      catchError(() => { this.feedback.set('Could not save. Check the API connection and squad rules.'); return EMPTY; }),
+      finalize(() => this.saving.set(false)),
+    ).subscribe(() => { this.captainId.set(captain.id); this.viceCaptainId.set(viceCaptain.id);
+      this.feedback.set('Squad, lineup, and captains saved.'); });
+  }
 }

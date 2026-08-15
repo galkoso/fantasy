@@ -4,14 +4,15 @@ import type { FootballDataProvider, ProviderFixture, ProviderPlayerStats } from 
 import { calculatePlayerPoints, type MatchPlayerStats } from '@ligat-fantasy/scoring';
 import type { Db } from 'mongodb';
 
-interface InternalFixture extends ProviderFixture { id: string; providerIds: { apiFootball: number } }
+interface InternalFixture extends ProviderFixture { id: string; gameweekId?: string; providerIds: { apiFootball: number } }
 interface ProviderIdentity { id: string; providerIds: { apiFootball: number } }
 
 export class FootballSyncJob {
   private running = false;
-  constructor(private readonly db: Db, private readonly provider: FootballDataProvider) {}
+  constructor(private readonly db: Db, private readonly provider: FootballDataProvider,
+    private readonly season: number) {}
 
-  async run(date: Date): Promise<void> {
+  async run(date?: Date): Promise<void> {
     if (this.running) return;
     this.running = true;
     try {
@@ -25,9 +26,23 @@ export class FootballSyncJob {
   private async upsertFixture(fixture: ProviderFixture): Promise<InternalFixture> {
     const collection = this.db.collection<InternalFixture>(collections.fixtures);
     const previous = await collection.findOne({ 'providerIds.apiFootball': fixture.providerId });
-    const document = { ...fixture, id: previous?.id ?? randomUUID(), providerIds: { apiFootball: fixture.providerId } };
+    const id = previous?.id ?? randomUUID();
+    const gameweekId = await this.ensureGameweek(fixture, id);
+    const document: InternalFixture = { ...fixture, id, providerIds: { apiFootball: fixture.providerId },
+      ...(gameweekId ? { gameweekId } : {}) };
     await collection.replaceOne({ 'providerIds.apiFootball': fixture.providerId }, document, { upsert: true });
     return document;
+  }
+
+  private async ensureGameweek(fixture: ProviderFixture, fixtureId: string): Promise<string | undefined> {
+    if (fixture.gameweekNumber === undefined) return undefined;
+    const collection = this.db.collection(collections.gameweeks);
+    const filter = { season: this.season, number: fixture.gameweekNumber };
+    await collection.updateOne(filter, { $setOnInsert: { id: randomUUID(), ...filter,
+      name: `Gameweek ${fixture.gameweekNumber}`, status: fixture.kickoffAt > new Date() ? 'OPEN' : 'LOCKED',
+      deadline: fixture.kickoffAt, fixtureIds: [], createdAt: new Date() },
+      $addToSet: { fixtureIds: fixtureId }, $min: { deadline: fixture.kickoffAt } }, { upsert: true });
+    return String((await collection.findOne(filter))!.id);
   }
 
   private async syncStats(fixture: InternalFixture): Promise<void> {
@@ -44,8 +59,18 @@ export class FootballSyncJob {
         { fixtureId: fixture.id, playerId: player.id, ...points, provisional: fixture.status !== 'FINISHED', updatedAt: new Date() },
         { upsert: true },
       );
+      await this.refreshPlayerFantasyStats(player.id);
       await this.publishPoints(player.id, fixture.id, points.total);
     }
+  }
+
+  private async refreshPlayerFantasyStats(playerId: string): Promise<void> {
+    const matches = await this.db.collection<{ total: number }>(collections.playerMatchPoints)
+      .find({ playerId }).sort({ updatedAt: -1 }).toArray();
+    const totalPoints = matches.reduce((sum, match) => sum + match.total, 0);
+    const recent = matches.slice(0, 5);
+    const form = recent.length ? Number((recent.reduce((sum, match) => sum + match.total, 0) / recent.length).toFixed(1)) : 0;
+    await this.db.collection(collections.players).updateOne({ id: playerId }, { $set: { totalPoints, form } });
   }
 
   private async publishPoints(playerId: string, fixtureId: string, points: number): Promise<void> {

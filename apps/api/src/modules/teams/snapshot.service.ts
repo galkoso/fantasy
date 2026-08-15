@@ -20,7 +20,7 @@ export class SnapshotService {
       viceCaptainPlayerId: team.viceCaptainPlayerId, activeChip: null,
       squad: team.squad, bank: team.bank, submittedAt: new Date() };
     await this.db.collection(collections.snapshots).updateOne(
-      { gameweekId, fantasyTeamId: team.id }, { $setOnInsert: snapshot }, { upsert: true });
+      { gameweekId, fantasyTeamId: team.id }, { $set: snapshot }, { upsert: true });
     return (await this.db.collection(collections.snapshots).findOne({ gameweekId, fantasyTeamId: team.id }))!;
   }
 }

@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import type { PlayerSummary } from '@ligat-fantasy/contracts';
-import { catchError, type Observable, of } from 'rxjs';
+import type { DashboardDto, FantasyTeamDto, GameweekSummary, LiveEvent, PlayerSummary } from '@ligat-fantasy/contracts';
+import { catchError, map, type Observable, of } from 'rxjs';
 import { DEMO_PLAYERS } from './demo-players';
 
 export interface PlayerFilters {
@@ -21,8 +21,49 @@ export class FantasyApiService {
     if (filters.position && filters.position !== 'ALL') params = params.set('position', filters.position);
     if (filters.sort) params = params.set('sort', filters.sort);
     return this.http.get<PlayerSummary[]>(`${this.baseUrl}/players`, { params }).pipe(
+      map((players) => players.length ? players : filterDemoPlayers(filters)),
       catchError(() => of(filterDemoPlayers(filters))),
     );
+  }
+
+  team(): Observable<FantasyTeamDto | null> {
+    return this.http.get<FantasyTeamDto>(`${this.baseUrl}/fantasy-team`).pipe(catchError(() => of(null)));
+  }
+
+  saveSquad(name: string, playerIds: string[]): Observable<FantasyTeamDto> {
+    return this.http.put<FantasyTeamDto>(`${this.baseUrl}/fantasy-team/squad`, { name, playerIds });
+  }
+
+  saveLineup(starters: string[], bench: string[]): Observable<FantasyTeamDto> {
+    return this.http.put<FantasyTeamDto>(`${this.baseUrl}/fantasy-team/lineup`, { starters, bench });
+  }
+
+  saveCaptains(captainPlayerId: string, viceCaptainPlayerId: string): Observable<FantasyTeamDto> {
+    return this.http.put<FantasyTeamDto>(`${this.baseUrl}/fantasy-team/captain`,
+      { captainPlayerId, viceCaptainPlayerId });
+  }
+
+  currentGameweek(): Observable<GameweekSummary | null> {
+    return this.http.get<GameweekSummary>(`${this.baseUrl}/gameweeks/current`).pipe(catchError(() => of(null)));
+  }
+
+  submitGameweek(gameweekId: string): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/fantasy-team/gameweeks/${gameweekId}/submit`, {});
+  }
+
+  dashboard(): Observable<DashboardDto | null> {
+    return this.http.get<DashboardDto>(`${this.baseUrl}/dashboard`).pipe(catchError(() => of(null)));
+  }
+
+  liveEvents(): Observable<LiveEvent> {
+    return new Observable((subscriber) => {
+      const source = new EventSource(`${this.baseUrl}/live/events`);
+      const receive = (event: MessageEvent<string>) => subscriber.next(JSON.parse(event.data) as LiveEvent);
+      ['PLAYER_POINTS_UPDATED', 'GAMEWEEK_POINTS_UPDATED', 'RANK_UPDATED']
+        .forEach((type) => source.addEventListener(type, receive as EventListener));
+      source.onerror = () => subscriber.error(new Error('LIVE_STREAM_DISCONNECTED'));
+      return () => source.close();
+    });
   }
 }
 

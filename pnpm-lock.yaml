@@ -121,6 +121,9 @@ importers:
       '@ligat-fantasy/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@ligat-fantasy/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@ligat-fantasy/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -231,6 +234,9 @@ importers:
       '@ligat-fantasy/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@ligat-fantasy/domain':
+        specifier: workspace:*
+        version: link:../domain
     devDependencies:
       '@ligat-fantasy/typescript-config':
         specifier: workspace:*
