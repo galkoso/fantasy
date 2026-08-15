@@ -54,4 +54,22 @@ Gameweek snapshot creation uses a unique index, so retries cannot create duplica
 
 This baseline implements the Phase 1 vertical slice and domain-ready foundations. Authentication
 is represented by a local development user header until an identity provider is selected.
-Price automation and chips remain isolated Phase 2 capabilities rather than incomplete behavior.
+Price automation is implemented as an original configurable market algorithm; chip activation and
+Free Hit restoration remain isolated Phase 2 capabilities.
+
+## Gameweek processing
+
+The worker creates Gameweeks from provider round numbers and locks them at the first fixture
+deadline. It snapshots every complete team, recalculates provisional scores while fixtures are
+live, and finalizes once every fixture is complete. Final effects use per-team processed-Gameweek
+markers so free-transfer rollover and overall totals are safe to retry after a process failure.
+
+Team-score calculation is framework-free. It applies ordered legal substitutions, goalkeeper-only
+replacement, captain fallback, Bench Boost, Triple Captain, and transfer deductions to immutable
+snapshot data. Live totals are persisted before an SSE event is published.
+
+## Market processing
+
+Ownership and transfer aggregates are produced asynchronously by the worker. The configurable
+market engine changes prices by at most one integer unit per run and records dated price history;
+it is an original demand-based algorithm and does not claim to reproduce FPL's private algorithm.

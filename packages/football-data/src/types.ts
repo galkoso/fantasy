@@ -1,4 +1,5 @@
 import type { MatchPlayerStats } from '@ligat-fantasy/scoring';
+import type { PlayerPosition } from '@ligat-fantasy/contracts';
 
 export interface ProviderFixture {
   providerId: number;
@@ -14,7 +15,7 @@ export interface ProviderFixture {
 export interface ProviderClub { providerId: number; name: string; shortName: string; logoUrl?: string }
 export interface ProviderPlayer {
   providerId: number; clubProviderId: number; name: string;
-  position: import('@ligat-fantasy/contracts').PlayerPosition;
+  position: PlayerPosition;
 }
 
 export interface ProviderPlayerStats extends Omit<MatchPlayerStats, 'fixtureId' | 'playerId'> {

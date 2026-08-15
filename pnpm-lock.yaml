@@ -127,6 +127,9 @@ importers:
       '@ligat-fantasy/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@ligat-fantasy/domain':
+        specifier: workspace:*
+        version: link:../../packages/domain
       '@ligat-fantasy/football-data':
         specifier: workspace:*
         version: link:../../packages/football-data

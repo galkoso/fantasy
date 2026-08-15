@@ -59,7 +59,7 @@ export class FootballSyncJob {
   }
 
   private async syncStats(fixture: InternalFixture): Promise<void> {
-    for (const providerStats of await this.provider.getPlayerStats(fixture.providerId)) {
+    for (const providerStats of await this.provider.getPlayerStats(fixture.providerIds.apiFootball)) {
       const player = await this.db.collection<ProviderIdentity>(collections.players)
         .findOne({ 'providerIds.apiFootball': providerStats.playerProviderId });
       if (!player) continue;
