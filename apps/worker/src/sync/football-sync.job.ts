@@ -53,7 +53,7 @@ export class FootballSyncJob {
     const filter = { season: this.season, number: fixture.gameweekNumber };
     await collection.updateOne(filter, { $setOnInsert: { id: randomUUID(), ...filter,
       name: `Gameweek ${fixture.gameweekNumber}`, status: fixture.kickoffAt > new Date() ? 'OPEN' : 'LOCKED',
-      deadline: fixture.kickoffAt, fixtureIds: [], createdAt: new Date() },
+      deadline: fixture.kickoffAt, createdAt: new Date() },
       $addToSet: { fixtureIds: fixtureId }, $min: { deadline: fixture.kickoffAt } }, { upsert: true });
     return String((await collection.findOne(filter))!.id);
   }
