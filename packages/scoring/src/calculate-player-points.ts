@@ -15,8 +15,8 @@ export function calculatePlayerPoints(
     assists: stats.assists * 3,
     cleanSheet: stats.minutes >= 60 && stats.goalsConcededWhilePlaying === 0
       ? cleanSheetPoints[stats.position] : 0,
-    goalsConceded: stats.position === 'GOALKEEPER' || stats.position === 'DEFENDER'
-      ? -Math.floor(stats.goalsConcededWhilePlaying / 2) : 0,
+    goalsConceded: (stats.position === 'GOALKEEPER' || stats.position === 'DEFENDER') &&
+      stats.goalsConcededWhilePlaying >= 2 ? -Math.floor(stats.goalsConcededWhilePlaying / 2) : 0,
     saves: stats.position === 'GOALKEEPER' ? Math.floor(stats.saves / 3) : 0,
     penalties: stats.penaltiesSaved * 5 - stats.penaltiesMissed * 2,
     cards: -stats.yellowCards - stats.redCards * 3,

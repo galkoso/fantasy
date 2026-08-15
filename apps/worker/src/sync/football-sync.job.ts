@@ -55,6 +55,9 @@ export class FootballSyncJob {
 }
 
 function normalizeStats(fixtureId: string, playerId: string, stats: ProviderPlayerStats): MatchPlayerStats {
-  const { fixtureProviderId: _fixture, playerProviderId: _player, clubProviderId: _club, ...normalized } = stats;
-  return { fixtureId, playerId, ...normalized };
+  return { fixtureId, playerId, position: stats.position, minutes: stats.minutes, goals: stats.goals,
+    assists: stats.assists, goalsConcededWhilePlaying: stats.goalsConcededWhilePlaying,
+    saves: stats.saves, penaltiesSaved: stats.penaltiesSaved, penaltiesMissed: stats.penaltiesMissed,
+    yellowCards: stats.yellowCards, redCards: stats.redCards, ownGoals: stats.ownGoals,
+    ...(stats.rating === undefined ? {} : { rating: stats.rating }) };
 }

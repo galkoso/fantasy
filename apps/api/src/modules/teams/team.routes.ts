@@ -6,6 +6,7 @@ import { PlayerRepository } from '../players/player.repository.js';
 import { TeamRepository } from './team.repository.js';
 import { TeamService } from './team.service.js';
 import { TransferService } from './transfer.service.js';
+import { SnapshotService } from './snapshot.service.js';
 
 const squadSchema = z.object({ name: z.string().trim().min(2).max(40), playerIds: z.array(z.string()).length(15) });
 const lineupSchema = z.object({ starters: z.array(z.string()).length(11), bench: z.array(z.string()).length(4) });
@@ -17,6 +18,7 @@ export async function registerTeamRoutes(app: FastifyInstance, context: AppConte
   const playerRepository = new PlayerRepository(context.db);
   const service = new TeamService(teamRepository, playerRepository);
   const transfers = new TransferService(context.client, teamRepository, playerRepository);
+  const snapshots = new SnapshotService(context.db, teamRepository);
   app.get('/fantasy-team', (request) => service.getOrCreate(requestUserId(request)));
   app.put('/fantasy-team/squad', (request) => service.replaceSquad(requestUserId(request), squadSchema.parse(request.body)));
   app.put('/fantasy-team/lineup', (request) => {
@@ -29,6 +31,14 @@ export async function registerTeamRoutes(app: FastifyInstance, context: AppConte
   });
   app.post('/transfers', (request) =>
     transfers.execute(requestUserId(request), transferSchema.parse(request.body)));
-  app.get('/transfers', async (request) => context.db.collection('transfers')
-    .find({ userId: requestUserId(request) }).sort({ createdAt: -1 }).limit(100).toArray());
+  app.get('/transfers', async (request) => {
+    const team = await teamRepository.findByUser(requestUserId(request));
+    if (!team) return [];
+    return context.db.collection('transfers').find({ fantasyTeamId: team.id })
+      .sort({ createdAt: -1 }).limit(100).toArray();
+  });
+  app.post('/fantasy-team/gameweeks/:gameweekId/submit', (request) => {
+    const { gameweekId } = z.object({ gameweekId: z.string() }).parse(request.params);
+    return snapshots.submit(requestUserId(request), gameweekId);
+  });
 }

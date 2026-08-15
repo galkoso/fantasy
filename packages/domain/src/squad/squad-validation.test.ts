@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DomainError } from '../errors/domain-error.js';
+import type { DomainError } from '../errors/domain-error.js';
 import type { OwnedPlayer } from '../types.js';
 import { validateSquad } from './squad-validation.js';
 

@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import type { PlayerSummary } from '@ligat-fantasy/contracts';
 import { catchError, type Observable, of } from 'rxjs';
 import { DEMO_PLAYERS } from './demo-players';
@@ -13,7 +13,7 @@ export interface PlayerFilters {
 @Injectable({ providedIn: 'root' })
 export class FantasyApiService {
   private readonly baseUrl = 'http://localhost:3000';
-  constructor(private readonly http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
   players(filters: PlayerFilters = {}): Observable<PlayerSummary[]> {
     let params = new HttpParams();

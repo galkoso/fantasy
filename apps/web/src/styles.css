@@ -1,6 +1,6 @@
 :root { --ink: #051820; --deep: #071f2b; --surface: #0c2a37; --surface-2: #123643;
   --text: #f5f8f2; --muted: #94aab1; --line: rgba(181, 221, 213, .13); --lime: #c8f33d;
-  --cyan: #31d7c5; --amber: #ffbd59; --danger: #ff6f61; --display: 'Manrope', sans-serif; }
+  --cyan: #31d7c5; --amber: #ffbd59; --danger: #ff6f61; --display: 'Arial Black', 'Arial Narrow', sans-serif; }
 * { box-sizing: border-box; } html { background: var(--ink); } body { margin: 0; min-width: 320px;
   color: var(--text); background: radial-gradient(circle at 75% 5%, rgba(30, 114, 110, .23), transparent 28%), var(--ink);
-  font-family: 'DM Sans', sans-serif; } button,input,select { font: inherit; } button:focus-visible,input:focus-visible,select:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+  font-family: Inter, Avenir, 'Segoe UI', Arial, sans-serif; } button,input,select { font: inherit; } button:focus-visible,input:focus-visible,select:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }

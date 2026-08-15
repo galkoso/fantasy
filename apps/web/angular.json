@@ -17,7 +17,8 @@
             "styles": ["src/styles.css"]
           },
           "configurations": {
-            "production": { "outputHashing": "all", "budgets": [{ "type": "initial", "maximumWarning": "700kb", "maximumError": "1mb" }] }
+            "production": { "outputHashing": "all", "budgets": [{ "type": "initial", "maximumWarning": "700kb", "maximumError": "1mb" }] },
+            "development": { "optimization": false, "sourceMap": true, "namedChunks": true }
           },
           "defaultConfiguration": "production"
         },
