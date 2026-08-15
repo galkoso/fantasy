@@ -1,0 +1,13 @@
+{
+  "extends": "@ligat-fantasy/typescript-config/base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "dom"],
+    "useDefineForClassFields": false,
+    "types": [],
+    "outDir": "dist/out-tsc"
+  },
+  "angularCompilerOptions": { "strictTemplates": true, "strictInjectionParameters": true }
+}

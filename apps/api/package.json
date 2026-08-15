@@ -1,0 +1,29 @@
+{
+  "name": "@ligat-fantasy/api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/main.ts",
+    "lint": "eslint src",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.1.0",
+    "@ligat-fantasy/config": "workspace:*",
+    "@ligat-fantasy/contracts": "workspace:*",
+    "@ligat-fantasy/database": "workspace:*",
+    "@ligat-fantasy/domain": "workspace:*",
+    "fastify": "^5.5.0",
+    "mongodb": "^6.18.0",
+    "zod": "^4.0.17"
+  },
+  "devDependencies": {
+    "@ligat-fantasy/typescript-config": "workspace:*",
+    "@types/node": "^24.3.0",
+    "tsx": "^4.20.5",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@ligat-fantasy/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": { "zod": "^4.0.17" },
+  "devDependencies": {
+    "@ligat-fantasy/typescript-config": "workspace:*",
+    "@types/node": "^24.3.0",
+    "vitest": "^3.2.4"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@ligat-fantasy/database",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "lint": "eslint src",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": { "mongodb": "^6.18.0" },
+  "devDependencies": {
+    "@ligat-fantasy/typescript-config": "workspace:*",
+    "@types/node": "^24.3.0",
+    "vitest": "^3.2.4"
+  }
+}
