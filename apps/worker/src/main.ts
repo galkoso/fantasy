@@ -5,6 +5,7 @@ import { FootballSyncJob } from './sync/football-sync.job.js';
 import { GameweekLifecycleJob } from './gameweeks/gameweek-lifecycle.job.js';
 import { CatalogSyncJob } from './sync/catalog-sync.job.js';
 import { OwnershipAggregateJob } from './market/ownership-aggregate.job.js';
+import { PlayerPriceJob } from './market/player-price.job.js';
 
 const config = loadConfig();
 const connection = await connectDatabase(config.MONGODB_URI);
@@ -15,6 +16,9 @@ setInterval(() => void lifecycle.run(), 30_000);
 const ownership = new OwnershipAggregateJob(connection.db);
 await ownership.run();
 setInterval(() => void ownership.run(), 300_000);
+const prices = new PlayerPriceJob(connection.db);
+await prices.run();
+setInterval(() => void prices.run(), 3_600_000);
 
 if (!config.API_FOOTBALL_KEY) {
   console.warn('API_FOOTBALL_KEY is empty; football polling is disabled.');

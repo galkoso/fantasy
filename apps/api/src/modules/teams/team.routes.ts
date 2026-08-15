@@ -41,4 +41,14 @@ export async function registerTeamRoutes(app: FastifyInstance, context: AppConte
     const { gameweekId } = z.object({ gameweekId: z.string() }).parse(request.params);
     return snapshots.submit(requestUserId(request), gameweekId);
   });
+  app.get('/fantasy-team/gameweeks/:gameweekId', async (request) => {
+    const { gameweekId } = z.object({ gameweekId: z.string() }).parse(request.params);
+    const team = await teamRepository.findByUser(requestUserId(request));
+    if (!team) return { snapshot: null, score: null };
+    const [snapshot, score] = await Promise.all([
+      context.db.collection('gameweek_team_snapshots').findOne({ gameweekId, fantasyTeamId: team.id }),
+      context.db.collection('gameweek_user_scores').findOne({ gameweekId, fantasyTeamId: team.id }),
+    ]);
+    return { snapshot, score };
+  });
 }

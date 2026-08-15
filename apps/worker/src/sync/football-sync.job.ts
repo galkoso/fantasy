@@ -4,7 +4,11 @@ import type { FootballDataProvider, ProviderFixture, ProviderPlayerStats } from 
 import { calculatePlayerPoints, type MatchPlayerStats } from '@ligat-fantasy/scoring';
 import type { Db } from 'mongodb';
 
-interface InternalFixture extends ProviderFixture { id: string; gameweekId?: string; providerIds: { apiFootball: number } }
+interface InternalFixture {
+  id: string; providerIds: { apiFootball: number }; kickoffAt: Date;
+  status: ProviderFixture['status']; homeClubId: string; awayClubId: string;
+  homeGoals: number | null; awayGoals: number | null; gameweekId?: string;
+}
 interface ProviderIdentity { id: string; providerIds: { apiFootball: number } }
 
 export class FootballSyncJob {
@@ -28,7 +32,16 @@ export class FootballSyncJob {
     const previous = await collection.findOne({ 'providerIds.apiFootball': fixture.providerId });
     const id = previous?.id ?? randomUUID();
     const gameweekId = await this.ensureGameweek(fixture, id);
-    const document: InternalFixture = { ...fixture, id, providerIds: { apiFootball: fixture.providerId },
+    const clubs = await this.db.collection<ProviderIdentity>(collections.clubs).find({
+      'providerIds.apiFootball': { $in: [fixture.homeClubProviderId, fixture.awayClubProviderId] },
+    }).toArray();
+    const clubIds = new Map(clubs.map((club) => [club.providerIds.apiFootball, club.id]));
+    const homeClubId = clubIds.get(fixture.homeClubProviderId);
+    const awayClubId = clubIds.get(fixture.awayClubProviderId);
+    if (!homeClubId || !awayClubId) throw new Error('FIXTURE_CLUB_MAPPING_MISSING');
+    const document: InternalFixture = { id, kickoffAt: fixture.kickoffAt, status: fixture.status,
+      homeClubId, awayClubId, homeGoals: fixture.homeGoals, awayGoals: fixture.awayGoals,
+      providerIds: { apiFootball: fixture.providerId },
       ...(gameweekId ? { gameweekId } : {}) };
     await collection.replaceOne({ 'providerIds.apiFootball': fixture.providerId }, document, { upsert: true });
     return document;

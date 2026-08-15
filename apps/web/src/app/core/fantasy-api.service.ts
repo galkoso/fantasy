@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { DashboardDto, FantasyTeamDto, GameweekSummary, LiveEvent, PlayerSummary } from '@ligat-fantasy/contracts';
-import { catchError, map, type Observable, of } from 'rxjs';
+import { catchError, map, Observable, of } from 'rxjs';
 import { DEMO_PLAYERS } from './demo-players';
 
 export interface PlayerFilters {

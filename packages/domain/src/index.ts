@@ -3,6 +3,7 @@ export * from './errors/domain-error.js';
 export * from './lineup/auto-substitutions.js';
 export * from './lineup/formation.js';
 export * from './pricing/selling-price.js';
+export * from './pricing/player-price-engine.js';
 export * from './rules/season-rules.js';
 export * from './squad/squad-validation.js';
 export * from './transfers/transfer-cost.js';
