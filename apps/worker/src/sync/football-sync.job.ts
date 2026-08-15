@@ -50,11 +50,8 @@ export class FootballSyncJob {
   private async ensureGameweek(fixture: ProviderFixture, fixtureId: string): Promise<string | undefined> {
     if (fixture.gameweekNumber === undefined) return undefined;
     const collection = this.db.collection(collections.gameweeks);
-    const filter = { season: this.season, number: fixture.gameweekNumber };
-    await collection.updateOne(filter, { $setOnInsert: { id: randomUUID(), ...filter,
-      name: `Gameweek ${fixture.gameweekNumber}`, status: fixture.kickoffAt > new Date() ? 'OPEN' : 'LOCKED',
-      deadline: fixture.kickoffAt, createdAt: new Date() },
-      $addToSet: { fixtureIds: fixtureId }, $min: { deadline: fixture.kickoffAt } }, { upsert: true });
+    const { filter, update } = buildGameweekUpsert(fixture, fixtureId, this.season);
+    await collection.updateOne(filter, update, { upsert: true });
     return String((await collection.findOne(filter))!.id);
   }
 
@@ -90,6 +87,15 @@ export class FootballSyncJob {
     await this.db.collection('live_events').insertOne({ id: randomUUID(), type: 'PLAYER_POINTS_UPDATED',
       occurredAt: new Date(), payload: { playerId, fixtureId, points }, expiresAt: new Date(Date.now() + 86_400_000) });
   }
+}
+
+export function buildGameweekUpsert(fixture: ProviderFixture, fixtureId: string, season: number,
+  id: string = randomUUID(), now = new Date()) {
+  const number = fixture.gameweekNumber!;
+  const filter = { season, number };
+  return { filter, update: { $setOnInsert: { id, ...filter, name: `Gameweek ${number}`,
+    status: fixture.kickoffAt > now ? 'OPEN' : 'LOCKED', createdAt: now },
+    $addToSet: { fixtureIds: fixtureId }, $min: { deadline: fixture.kickoffAt } } };
 }
 
 function normalizeStats(fixtureId: string, playerId: string, stats: ProviderPlayerStats): MatchPlayerStats {
