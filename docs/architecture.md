@@ -1,5 +1,12 @@
 # Architecture
 
+## Compiler versions
+
+Node, domain, worker, and shared packages compile with the explicit `typescript-7` 7.0.2 binary.
+The Angular application and ESLint parser use TypeScript 6.0.3 because Angular 22.1 officially
+requires TypeScript `>=6.0 <6.1`. Keeping this compiler local to `apps/web` avoids disabling
+Angular's version safety check while the remainder of the monorepo uses TypeScript 7.
+
 ## Reference constraint
 
 The requested Zapp monorepo was not present in the provided workspace when this project was

@@ -25,5 +25,8 @@
         "serve": { "builder": "@angular/build:dev-server", "configurations": { "production": { "buildTarget": "web:build:production" }, "development": { "buildTarget": "web:build" } }, "defaultConfiguration": "development" }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }

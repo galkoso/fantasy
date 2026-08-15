@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "node ../../node_modules/typescript-7/bin/tsc -p tsconfig.json",
     "dev": "tsx watch src/main.ts",
     "lint": "eslint src",
     "test": "vitest run --passWithNoTests",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "node ../../node_modules/typescript-7/bin/tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
