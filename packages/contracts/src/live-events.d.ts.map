@@ -1,0 +1,1 @@
+{"version":3,"file":"live-events.d.ts","sourceRoot":"","sources":["live-events.ts"],"names":[],"mappings":"AAAA,MAAM,MAAM,aAAa,GACrB,qBAAqB,GACrB,uBAAuB,GACvB,yBAAyB,GACzB,cAAc,CAAC;AAEnB,MAAM,WAAW,SAAS,CAAC,CAAC,GAAG,OAAO;IACpC,EAAE,EAAE,MAAM,CAAC;IACX,IAAI,EAAE,aAAa,CAAC;IACpB,UAAU,EAAE,MAAM,CAAC;IACnB,OAAO,EAAE,CAAC,CAAC;CACZ"}

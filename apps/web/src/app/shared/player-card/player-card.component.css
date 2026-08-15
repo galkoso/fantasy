@@ -1,0 +1,14 @@
+.card { width: 104px; min-height: 112px; position: relative; display: flex; flex-direction: column; align-items: center;
+  padding: 4px 3px 0; border: 0; color: var(--text); background: transparent; cursor: pointer; }
+.shirt { width: 58px; height: 55px; display: grid; place-items: center; background: linear-gradient(145deg, #27c5b7, #0e817c);
+  clip-path: polygon(20% 4%, 36% 0, 42% 12%, 58% 12%, 64% 0, 80% 4%, 100% 25%, 85% 42%, 76% 31%, 76% 100%, 24% 100%, 24% 31%, 15% 42%, 0 25%); filter: drop-shadow(0 7px 5px rgba(0,0,0,.24)); }
+.shirt::after { content: 'LF'; font: 800 11px var(--display); color: rgba(255,255,255,.9); }.shirt i { position: absolute; width: 16px; height: 4px; top: 10px; background: var(--lime); }
+.name { width: 100%; margin-top: -1px; padding: 4px 5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  color: #102129; background: #f8faf4; border-radius: 4px 4px 0 0; font-size: 10px; font-weight: 800; }
+.meta { width: 100%; display: flex; justify-content: space-between; padding: 3px 5px; color: #d6eeea;
+  background: #0a2733; border-radius: 0 0 4px 4px; font-size: 9px; }.meta b { color: var(--lime); }
+.badge { position: absolute; z-index: 2; top: 0; right: 12px; display: grid; place-items: center; width: 24px; height: 24px;
+  border-radius: 50%; color: var(--ink); background: var(--lime); border: 2px solid white; font-size: 10px; font-weight: 900; }
+.badge.vice { background: white; }
+@media (max-width: 520px) { .card { width: 76px; min-height: 90px; }.shirt { width: 44px; height: 43px; }
+  .name { font-size: 8px; }.meta { font-size: 7px; }.badge { right: 4px; width: 20px; height: 20px; } }

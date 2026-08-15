@@ -1,0 +1,7 @@
+<button class="card" (click)="remove.emit(player().id)" [attr.aria-label]="'Remove ' + player().name">
+  @if (captain()) { <span class="badge">C</span> }
+  @if (viceCaptain()) { <span class="badge vice">V</span> }
+  <span class="shirt" [attr.data-club]="player().clubId"><i></i></span>
+  <span class="name">{{ player().name }}</span>
+  <span class="meta">{{ player().price / 10 | number:'1.1-1' }}m <b>{{ player().totalPoints }} pts</b></span>
+</button>

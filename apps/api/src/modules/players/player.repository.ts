@@ -3,11 +3,11 @@ import type { PlayerSummary } from '@ligat-fantasy/contracts';
 import type { Db, Filter } from 'mongodb';
 
 export interface PlayerQuery {
-  search?: string;
-  position?: PlayerSummary['position'];
-  clubId?: string;
-  maxPrice?: number;
-  sort?: 'totalPoints' | 'price' | 'selectedByPercent' | 'form';
+  search?: string | undefined;
+  position?: PlayerSummary['position'] | undefined;
+  clubId?: string | undefined;
+  maxPrice?: number | undefined;
+  sort?: 'totalPoints' | 'price' | 'selectedByPercent' | 'form' | undefined;
 }
 
 export class PlayerRepository {
