@@ -23,3 +23,28 @@ export interface DashboardDto {
   gameweekPoints: number;
   provisional: boolean;
 }
+
+export type FantasyChip = 'WILDCARD' | 'FREE_HIT' | 'BENCH_BOOST' | 'TRIPLE_CAPTAIN';
+
+export interface GameweekTeamSnapshotDto {
+  fantasyTeamId: string;
+  gameweekId: string;
+  squad: SquadMemberDto[];
+  starters: string[];
+  bench: string[];
+  captainPlayerId: string;
+  viceCaptainPlayerId: string;
+  activeChip: FantasyChip | null;
+  bank: number;
+  submittedAt: string;
+}
+
+export interface GameweekUserScoreDto {
+  fantasyTeamId: string;
+  gameweekId: string;
+  grossPoints: number;
+  transferCost: number;
+  totalPoints: number;
+  provisional: boolean;
+  rank?: number;
+}

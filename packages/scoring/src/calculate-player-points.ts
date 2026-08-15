@@ -16,11 +16,11 @@ export function calculatePlayerPoints(
     cleanSheet: stats.minutes >= 60 && stats.goalsConcededWhilePlaying === 0
       ? cleanSheetPoints[stats.position] : 0,
     goalsConceded: (stats.position === 'GOALKEEPER' || stats.position === 'DEFENDER') &&
-      stats.goalsConcededWhilePlaying >= 2 ? -Math.floor(stats.goalsConcededWhilePlaying / 2) : 0,
+      (stats.goalsConcededWhilePlaying ?? 0) >= 2 ? -Math.floor(stats.goalsConcededWhilePlaying! / 2) : 0,
     saves: stats.position === 'GOALKEEPER' ? Math.floor(stats.saves / 3) : 0,
     penalties: stats.penaltiesSaved * 5 - stats.penaltiesMissed * 2,
     cards: -stats.yellowCards - stats.redCards * 3,
-    ownGoals: stats.ownGoals * -2,
+    ownGoals: (stats.ownGoals ?? 0) * -2,
     bonus: bonusStrategy.pointsFor(stats),
   };
   return { total: Object.values(breakdown).reduce((sum, points) => sum + points, 0), breakdown };

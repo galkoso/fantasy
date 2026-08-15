@@ -17,7 +17,7 @@ export async function registerTeamRoutes(app: FastifyInstance, context: AppConte
   const teamRepository = new TeamRepository(context.db);
   const playerRepository = new PlayerRepository(context.db);
   const service = new TeamService(teamRepository, playerRepository);
-  const transfers = new TransferService(context.client, teamRepository, playerRepository);
+  const transfers = new TransferService(context.client, context.db, teamRepository, playerRepository);
   const snapshots = new SnapshotService(context.db, teamRepository);
   app.get('/fantasy-team', (request) => service.getOrCreate(requestUserId(request)));
   app.put('/fantasy-team/squad', (request) => service.replaceSquad(requestUserId(request), squadSchema.parse(request.body)));

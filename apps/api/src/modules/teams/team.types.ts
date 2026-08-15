@@ -19,6 +19,7 @@ export interface TransferInput {
 
 export interface TransferDocument {
   fantasyTeamId: string;
+  gameweekId: string;
   playerOutId: string;
   playerInId: string;
   soldPrice: number;

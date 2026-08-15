@@ -1,6 +1,7 @@
 import { DomainError, calculateSellingPrice, validateSquad } from '@ligat-fantasy/domain';
+import { collections } from '@ligat-fantasy/database';
 import type { OwnedPlayer } from '@ligat-fantasy/domain';
-import type { MongoClient } from 'mongodb';
+import type { Db, MongoClient } from 'mongodb';
 import type { PlayerRepository } from '../players/player.repository.js';
 import type { TeamRepository } from './team.repository.js';
 import type { TransferInput } from './team.types.js';
@@ -8,6 +9,7 @@ import type { TransferInput } from './team.types.js';
 export class TransferService {
   constructor(
     private readonly client: MongoClient,
+    private readonly db: Db,
     private readonly teams: TeamRepository,
     private readonly players: PlayerRepository,
   ) {}
@@ -16,6 +18,12 @@ export class TransferService {
     const session = this.client.startSession();
     try {
       return await session.withTransaction(async () => {
+        const gameweek = await this.db.collection(collections.gameweeks).findOne({
+          status: 'OPEN', deadline: { $gt: new Date() },
+        }, { session });
+        if (!gameweek) {
+          throw new DomainError('TRANSFER_DEADLINE_PASSED', 'Transfers are closed for the current Gameweek');
+        }
         const team = await this.teams.findByUser(userId);
         if (!team) throw new DomainError('PLAYER_NOT_IN_SQUAD', 'Fantasy team does not exist');
         const owned = team.squad.find(({ playerId }) => playerId === input.playerOutId);
@@ -40,7 +48,7 @@ export class TransferService {
         const updated = { ...team, bank, squad: squad.map(({ id, purchasePrice }) => ({ playerId: id, purchasePrice })),
           freeTransfers: Math.max(0, team.freeTransfers - 1), version: team.version + 1, updatedAt: new Date() };
         if (!(await this.teams.replaceVersioned(updated, team.version, session))) throw new Error('CONCURRENT_TEAM_UPDATE');
-        await this.teams.recordTransfer({ fantasyTeamId: team.id, playerOutId: outgoing.id,
+        await this.teams.recordTransfer({ fantasyTeamId: team.id, gameweekId: String(gameweek.id), playerOutId: outgoing.id,
           playerInId: incoming.id, soldPrice, purchasePrice: incoming.price, pointsCost, createdAt: new Date() }, session);
         return { bank, pointsCost };
       });

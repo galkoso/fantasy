@@ -7,13 +7,13 @@ export interface MatchPlayerStats {
   minutes: number;
   goals: number;
   assists: number;
-  goalsConcededWhilePlaying: number;
+  goalsConcededWhilePlaying: number | null;
   saves: number;
   penaltiesSaved: number;
   penaltiesMissed: number;
   yellowCards: number;
   redCards: number;
-  ownGoals: number;
+  ownGoals: number | null;
   rating?: number;
 }
 

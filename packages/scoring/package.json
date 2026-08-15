@@ -12,7 +12,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@ligat-fantasy/contracts": "workspace:*"
+    "@ligat-fantasy/contracts": "workspace:*",
+    "@ligat-fantasy/domain": "workspace:*"
   },
   "devDependencies": {
     "@ligat-fantasy/typescript-config": "workspace:*",

@@ -26,9 +26,9 @@ export class ApiFootballProvider implements FootballDataProvider {
       return [{ fixtureProviderId, playerProviderId: entry.player.id, clubProviderId: team.team.id,
         position: mapPosition(stats.games.position), minutes: stats.games.minutes ?? 0,
         goals: stats.goals.total ?? 0, assists: stats.goals.assists ?? 0,
-        goalsConcededWhilePlaying: stats.goals.conceded ?? 0, saves: stats.goals.saves ?? 0,
+        goalsConcededWhilePlaying: stats.goals.conceded, saves: stats.goals.saves ?? 0,
         penaltiesSaved: stats.penalty.saved ?? 0, penaltiesMissed: stats.penalty.missed ?? 0,
-        yellowCards: stats.cards.yellow, redCards: stats.cards.red, ownGoals: 0,
+        yellowCards: stats.cards.yellow, redCards: stats.cards.red, ownGoals: null,
         ...(stats.rating ? { rating: Number(stats.rating) } : {}) }];
     }));
   }

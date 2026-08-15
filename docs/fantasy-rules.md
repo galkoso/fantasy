@@ -4,10 +4,12 @@ Prices are integer tenths of a million. The authoritative season configuration s
 1,000 units, requires a 2/5/5/3 squad, permits three players per club, and validates legal XI
 formations.
 
-Implemented and tested: appearance, goals by position, provider assists, clean sheets, goals
-conceded while on pitch, saves, provider penalty saves/misses, cards, own goals, selling price,
+Implemented and tested in the pure engine: appearance, goals by position, provider assists, clean
+sheets, goals conceded while on pitch, saves, provider penalty saves/misses, cards, own goals, selling price,
 transfer hits, squad composition, formation, captain fallback, and ordered automatic substitutes.
 
+The API-Football adapter preserves unavailable own-goal and on-pitch concession facts as `null`, so
+the worker does not invent points. Event normalization can populate those engine inputs later.
 Rating bonus is behind a strategy interface and disabled by default. Exact FPL BPS and defensive
 contributions are intentionally unsupported because the required event-level data is not reliably
 available. No statistics are inferred.

@@ -5,6 +5,7 @@ coverage
 .env
 .DS_Store
 *.tsbuildinfo
+.angular
 
 # TypeScript compiler output accidentally emitted beside package sources
 packages/*/src/**/*.js
