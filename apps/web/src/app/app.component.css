@@ -10,12 +10,14 @@ button { color: inherit; font: inherit; }
 .brand-mark i:nth-child(1) { height: 14px; }.brand-mark i:nth-child(2) { height: 27px; }.brand-mark i:nth-child(3) { height: 20px; }
 .brand strong,.brand small { display: block; font-family: var(--display); letter-spacing: .08em; line-height: 1; }
 .brand strong { font-size: 18px; }.brand small { color: var(--lime); font-size: 10px; margin-top: 5px; }
-nav { display: flex; align-self: stretch; gap: 28px; }
+nav { display: flex; align-self: stretch; gap: 28px; margin-inline-end: auto; margin-inline-start: 28px; }
 nav a,nav button { background: none; border: 0; color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; position: relative; text-decoration: none; display: inline-flex; align-items: center; }
 nav a.active,nav a:hover,nav button.active,nav button:hover { color: var(--text); }
 nav a.active::after,nav button.active::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--lime); }
-.profile { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 30px; padding: 5px 14px 5px 5px; }
+.profile { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 30px; padding: 5px 8px 5px 5px; }
 .profile span { display: grid; place-items: center; width: 32px; height: 32px; color: var(--ink); background: var(--amber); border-radius: 50%; font-weight: 800; }.profile b { font-size: 12px; }
+.logout { margin-left: 4px; padding: 6px 10px; border: 0; border-radius: 20px; color: var(--ink); background: var(--lime); font-size: 11px; font-weight: 800; cursor: pointer; }
+.auth-main { min-height: 100vh; }
 .mobile-nav { display: none; }
 @media (max-width: 760px) {
   .topbar { height: 62px; }.topbar > nav,.profile { display: none; }

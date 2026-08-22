@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import type { FootballPlayerSummary, FootballTeamSummary, SquadPosition } from '@ligat-fantasy/contracts';
-import { CurrentUserService } from '../../core/current-user.service';
+import { AuthService } from '../../core/auth.service';
 import { IsraeliFaService } from '../../core/israeli-fa.service';
 import { POSITION_FILTERS, filterSquad, formatSyncResult, positionLabel } from './squad-filter';
 
@@ -12,7 +12,7 @@ import { POSITION_FILTERS, filterSquad, formatSyncResult, positionLabel } from '
 })
 export class SquadsComponent {
   private readonly israeliFa = inject(IsraeliFaService);
-  private readonly currentUser = inject(CurrentUserService);
+  private readonly auth = inject(AuthService);
 
   readonly teams = signal<FootballTeamSummary[]>([]);
   readonly squad = signal<FootballPlayerSummary[]>([]);
@@ -23,7 +23,7 @@ export class SquadsComponent {
   readonly loadingTeams = signal(true);
   readonly loadingPlayers = signal(false);
   readonly syncing = signal(false);
-  readonly isAdmin = signal(false);
+  readonly isAdmin = computed(() => this.auth.user()?.isAdmin === true);
   readonly teamsError = signal<string | null>(null);
   readonly playersError = signal<string | null>(null);
   readonly syncMessage = signal<string | null>(null);
@@ -33,10 +33,6 @@ export class SquadsComponent {
   readonly players = computed(() => filterSquad(this.squad(), { search: this.search(), position: this.position() }));
 
   constructor() {
-    this.currentUser.getCurrentUser().subscribe({
-      next: (user) => this.isAdmin.set(user.isAdmin),
-      error: () => this.isAdmin.set(false),
-    });
     this.loadTeams();
   }
 

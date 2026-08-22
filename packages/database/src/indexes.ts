@@ -4,6 +4,7 @@ import { collections as names } from './collections.js';
 export async function ensureIndexes(db: Db): Promise<void> {
   const teams = db.collection(names.teams);
   const players = db.collection(names.players);
+  const users = db.collection(names.users);
   await Promise.all([
     dropIndex(teams, 'providerIds.apiFootball_1'),
     dropIndex(teams, 'leagueId_1_season_1'),
@@ -29,6 +30,7 @@ export async function ensureIndexes(db: Db): Promise<void> {
       { key: { position: 1 } },
       { key: { name: 1 } },
     ]),
+    users.createIndexes([{ key: { email: 1 }, unique: true }]),
   ]);
 }
 

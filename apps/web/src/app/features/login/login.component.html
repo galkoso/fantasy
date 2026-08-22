@@ -1,0 +1,36 @@
+<section class="login-container">
+  <div class="auth-card">
+    <div class="card-header">
+      <h1>Welcome to Ligat Fantasy</h1>
+      <p>Your Israeli Premier League fantasy platform</p>
+    </div>
+
+    <div class="button-toggle" role="tablist" aria-label="Authentication">
+      <button type="button" role="tab" [class.active]="mode() === 'signIn'" (click)="setMode('signIn')">Log In</button>
+      <button type="button" role="tab" [class.active]="mode() === 'signUp'" (click)="setMode('signUp')">Sign Up</button>
+    </div>
+
+    <form class="auth-form" (submit)="submit($event)">
+      @if (mode() === 'signUp') {
+        <label class="input-group">
+          <span>Display name</span>
+          <input type="text" name="displayName" autocomplete="name" required />
+        </label>
+      }
+      <label class="input-group">
+        <span>Email</span>
+        <input type="email" name="email" autocomplete="email" placeholder="name@example.com" required />
+      </label>
+      <label class="input-group">
+        <span>Password</span>
+        <input type="password" name="password" [attr.autocomplete]="mode() === 'signUp' ? 'new-password' : 'current-password'" placeholder="••••••••" required minlength="8" />
+      </label>
+      @if (error()) {
+        <p class="form-error">{{ error() }}</p>
+      }
+      <button type="submit" class="auth-btn" [disabled]="submitting()">
+        @if (submitting()) { Please wait… } @else if (mode() === 'signUp') { Create account } @else { Log In }
+      </button>
+    </form>
+  </div>
+</section>

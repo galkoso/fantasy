@@ -13,6 +13,18 @@ export interface TeamDocument {
   lastSyncedAt: Date;
 }
 
+export type UserRole = 'user' | 'admin';
+
+export interface UserDocument {
+  _id: ObjectId;
+  email: string;
+  passwordHash: string;
+  displayName: string;
+  role: UserRole;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface PlayerDocument {
   _id: ObjectId;
   name: string;

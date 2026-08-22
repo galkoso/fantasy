@@ -1,15 +1,27 @@
-<header class="topbar">
-  <a class="brand" routerLink="/football/squads" aria-label="Ligat Fantasy home">
-    <span class="brand-mark"><i></i><i></i><i></i></span>
-    <span><strong>LIGAT</strong><small>FANTASY</small></span>
-  </a>
-  <nav aria-label="Primary navigation">
-    <a routerLink="/football/squads" routerLinkActive="active">Squads</a>
-  </nav>
-</header>
-<main>
+@if (showChrome()) {
+  <header class="topbar">
+    <a class="brand" routerLink="/football/squads" aria-label="Ligat Fantasy home">
+      <span class="brand-mark"><i></i><i></i><i></i></span>
+      <span><strong>LIGAT</strong><small>FANTASY</small></span>
+    </a>
+    <nav aria-label="Primary navigation">
+      <a routerLink="/football/squads" routerLinkActive="active">Squads</a>
+    </nav>
+    @if (auth.user(); as user) {
+      <div class="profile">
+        <span>{{ initials() }}</span>
+        <b>{{ user.displayName }}</b>
+        <button type="button" class="logout" (click)="logout()">Log out</button>
+      </div>
+    }
+  </header>
+}
+<main [class.auth-main]="!showChrome()">
   <router-outlet />
 </main>
-<nav class="mobile-nav" aria-label="Mobile navigation">
-  <a routerLink="/football/squads" routerLinkActive="active"><span>♟</span>Squads</a>
-</nav>
+@if (showChrome()) {
+  <nav class="mobile-nav" aria-label="Mobile navigation">
+    <a routerLink="/football/squads" routerLinkActive="active"><span>♟</span>Squads</a>
+    <button type="button" (click)="logout()"><span>⎋</span>Log out</button>
+  </nav>
+}

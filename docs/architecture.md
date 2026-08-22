@@ -22,6 +22,7 @@ football.org.il → israeliFaPooling → parsers → MongoDB → API REST → An
 | --- | --- | --- |
 | `teams` | Ligat Winner clubs | unique partial `providerIds.israeliFa`, `active` |
 | `players` | squad members | unique partial `providerIds.israeliFa`, `teamId`, `active`, `position`, `name` |
+| `users` | signed-in people | unique `email` |
 
 Application `_id` values are MongoDB ObjectIds. Israeli FA `team_id` / `player_id` values stay under
 `providerIds.israeliFa`. Repeated syncs are bulk upserts. A player `name` that no longer matches
@@ -29,6 +30,13 @@ Application `_id` values are MongoDB ObjectIds. Israeli FA `team_id` / `player_i
 Players missing from a successful squad
 fetch are marked `active: false` instead of being deleted. Empty or implausibly small scrapes abort
 without mass deactivation.
+
+## Users
+
+`apps/users` owns sign-up, sign-in, and session. Angular stores the access token in `localStorage`
+so closing Chrome and coming back keeps the user signed in until the token expires
+(`JWT_ACCESS_EXPIRES_IN_SECONDS`, default 30 days). Other services identify the user with
+`x-user-id` from that session.
 
 ## Synchronization
 

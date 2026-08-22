@@ -15,8 +15,12 @@ pnpm install
 pnpm dev
 ```
 
-The API defaults to `http://localhost:3000`, israeliFaPooling to `http://localhost:3001`, and the web
-application to `http://localhost:4200`. MongoDB must be available at `MONGODB_URI`.
+The API defaults to `http://localhost:3000`, israeliFaPooling to `http://localhost:3001`, the users
+service to `http://localhost:3002`, and the web application to `http://localhost:4200`. MongoDB must
+be available at `MONGODB_URI`.
+
+Open `http://localhost:4200` and use **Log In** / **Sign Up**. The access token is stored in Chrome
+`localStorage`, so you stay signed in after closing the browser.
 
 To run only the web application (without requiring MongoDB or the API):
 
@@ -24,14 +28,14 @@ To run only the web application (without requiring MongoDB or the API):
 pnpm dev:web
 ```
 
-To load Ligat Winner squads into MongoDB after startup, sign in as an admin (`x-user-id` listed in
-`ADMIN_USER_IDS`, default `local-demo-user`) and call `POST http://localhost:3001/sync-squads`, or
-open `/football/squads` and click **Refresh squads**.
+To load Ligat Winner squads into MongoDB after startup, add your user id to `ADMIN_USER_IDS` and
+call `POST http://localhost:3001/sync-squads`, or open `/football/squads` and click **Refresh squads**.
 
 ## Workspace
 
 - `apps/web`: Angular client for league teams and squads
 - `apps/api`: Fastify REST API that reads stored squads
+- `apps/users`: sign-up, sign-in, and session tokens
 - `apps/israeliFaPooling`: polls the Israeli FA and writes squads to MongoDB
 - `packages/football-data`: Israeli FA provider, parsers, and squad upserts
 - `packages/contracts`: shared transport contracts

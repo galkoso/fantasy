@@ -1,0 +1,30 @@
+{
+  "name": "@ligat-fantasy/users",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node ../../node_modules/typescript-7/bin/tsc -p tsconfig.json",
+    "dev": "tsx watch --env-file=../../.env src/main.ts",
+    "lint": "eslint src",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "node ../../node_modules/typescript-7/bin/tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.1.0",
+    "@ligat-fantasy/config": "workspace:*",
+    "@ligat-fantasy/contracts": "workspace:*",
+    "@ligat-fantasy/database": "workspace:*",
+    "bcryptjs": "^3.0.2",
+    "fastify": "^5.5.0",
+    "jose": "^6.0.12",
+    "mongodb": "^6.18.0",
+    "zod": "^4.0.17"
+  },
+  "devDependencies": {
+    "@ligat-fantasy/typescript-config": "workspace:*",
+    "@types/node": "^24.3.0",
+    "tsx": "^4.20.5",
+    "vitest": "^3.2.4"
+  }
+}
