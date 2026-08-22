@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { describe, expect, it } from 'vitest';
-import { buildPlayerFilter } from './football.repository.js';
+import { buildPlayerFilter } from './israeli-fa.repository.js';
 
 describe('buildPlayerFilter', () => {
   it('returns active players by default', () => {

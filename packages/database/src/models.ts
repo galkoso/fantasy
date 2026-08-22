@@ -22,6 +22,7 @@ export interface PlayerDocument {
   birthDate?: Date;
   age?: number;
   photo?: string;
+  providerName?: string;
   teamId: ObjectId;
   providerIds: { israeliFa?: string };
   active: boolean;

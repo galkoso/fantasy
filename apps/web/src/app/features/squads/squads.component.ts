@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import type { FootballPlayerSummary, FootballTeamSummary, SquadPosition } from '@ligat-fantasy/contracts';
-import { FootballApiService } from '../../core/football-api.service';
+import { CurrentUserService } from '../../core/current-user.service';
+import { IsraeliFaService } from '../../core/israeli-fa.service';
 import { POSITION_FILTERS, filterSquad, formatSyncResult, positionLabel } from './squad-filter';
 
 @Component({
@@ -10,7 +11,8 @@ import { POSITION_FILTERS, filterSquad, formatSyncResult, positionLabel } from '
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SquadsComponent {
-  private readonly api = inject(FootballApiService);
+  private readonly israeliFa = inject(IsraeliFaService);
+  private readonly currentUser = inject(CurrentUserService);
 
   readonly teams = signal<FootballTeamSummary[]>([]);
   readonly squad = signal<FootballPlayerSummary[]>([]);
@@ -31,7 +33,7 @@ export class SquadsComponent {
   readonly players = computed(() => filterSquad(this.squad(), { search: this.search(), position: this.position() }));
 
   constructor() {
-    this.api.getCurrentUser().subscribe({
+    this.currentUser.getCurrentUser().subscribe({
       next: (user) => this.isAdmin.set(user.isAdmin),
       error: () => this.isAdmin.set(false),
     });
@@ -55,7 +57,7 @@ export class SquadsComponent {
     if (this.syncing()) return;
     this.syncing.set(true);
     this.syncMessage.set(null);
-    this.api.syncSquads().subscribe({
+    this.israeliFa.syncSquads().subscribe({
       next: (result) => {
         this.syncing.set(false);
         this.syncMessage.set(formatSyncResult(result));
@@ -75,7 +77,7 @@ export class SquadsComponent {
   private loadTeams(): void {
     this.loadingTeams.set(true);
     this.teamsError.set(null);
-    this.api.getTeams().subscribe({
+    this.israeliFa.getTeams().subscribe({
       next: (teams) => {
         this.teams.set(teams);
         this.loadingTeams.set(false);
@@ -95,7 +97,7 @@ export class SquadsComponent {
   private loadSquad(teamId: string): void {
     this.loadingPlayers.set(true);
     this.playersError.set(null);
-    this.api.getPlayersByTeam(teamId).subscribe({
+    this.israeliFa.getPlayersByTeam(teamId).subscribe({
       next: (players) => { this.squad.set(players); this.loadingPlayers.set(false); },
       error: () => { this.playersError.set('Could not load this squad.'); this.loadingPlayers.set(false); },
     });

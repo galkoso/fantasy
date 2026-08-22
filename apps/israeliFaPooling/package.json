@@ -1,5 +1,5 @@
 {
-  "name": "@ligat-fantasy/api",
+  "name": "@ligat-fantasy/israeli-fa-pooling",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,9 +15,9 @@
     "@ligat-fantasy/config": "workspace:*",
     "@ligat-fantasy/contracts": "workspace:*",
     "@ligat-fantasy/database": "workspace:*",
+    "@ligat-fantasy/football-data": "workspace:*",
     "fastify": "^5.5.0",
-    "mongodb": "^6.18.0",
-    "zod": "^4.0.17"
+    "mongodb": "^6.18.0"
   },
   "devDependencies": {
     "@ligat-fantasy/typescript-config": "workspace:*",

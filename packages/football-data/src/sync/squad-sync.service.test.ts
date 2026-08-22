@@ -3,9 +3,25 @@ import { ObjectId, type AnyBulkWriteOperation, type Db, type Filter, type Update
 import { describe, expect, it } from 'vitest';
 import type { ExternalPlayer, ExternalTeam, FootballDataProvider } from '../football-data-provider.js';
 import { ScrapeValidationError } from '../israeli-fa/validation.js';
-import { SquadSyncService, buildPlayerBulkOps } from './squad-sync.service.js';
+import { SquadSyncService, buildPlayerBulkOps, pooledDisplayName } from './squad-sync.service.js';
 
 const silentLogger = { info() {}, warn() {}, error() {} };
+
+describe('pooledDisplayName', () => {
+  it('uses the FA name for a new player', () => {
+    expect(pooledDisplayName('דור פרץ')).toBe('דור פרץ');
+  });
+
+  it('keeps a name that no longer matches the last FA name', () => {
+    expect(pooledDisplayName('דור פרץ', { name: 'Dor Peretz', providerName: 'דור פרץ' })).toBeUndefined();
+    expect(pooledDisplayName('דור פרץ', { name: 'Dor Peretz' })).toBeUndefined();
+  });
+
+  it('follows the FA name while the display name still matches it', () => {
+    expect(pooledDisplayName('New', { name: 'Old', providerName: 'Old' })).toBe('New');
+    expect(pooledDisplayName('Same', { name: 'Same' })).toBe('Same');
+  });
+});
 
 describe('SquadSyncService', () => {
   it('does not put the same path in both $set and $setOnInsert for player upserts', () => {
@@ -45,6 +61,33 @@ describe('SquadSyncService', () => {
     expect(store.players).toHaveLength(1);
     expect(store.players[0]?.providerIds.israeliFa).toBe('10');
     expect(store.players[0]?.active).toBe(true);
+  });
+
+  it('keeps a manually edited player name on the next pool and still tracks the FA name', async () => {
+    const { db, store } = memoryDb();
+    const sync = new SquadSyncService(db, fakeProvider({
+      teams: [team('1061', 'Maccabi Tel Aviv')], squads: { 1061: [player('10', 'דור פרץ')] },
+    }), testOptions(), silentLogger);
+    await sync.syncIsraeliPremierLeagueSquads();
+    const stored = store.players[0];
+    expect(stored?.name).toBe('דור פרץ');
+    if (stored) stored.name = 'Dor Peretz';
+    await sync.syncIsraeliPremierLeagueSquads();
+    expect(store.players).toHaveLength(1);
+    expect(store.players[0]?.name).toBe('Dor Peretz');
+    expect(store.players[0]?.providerName).toBe('דור פרץ');
+  });
+
+  it('updates the display name when it still matches the last FA name', async () => {
+    const { db, store } = memoryDb();
+    await new SquadSyncService(db, fakeProvider({
+      teams: [team('1061', 'Maccabi Tel Aviv')], squads: { 1061: [player('10', 'Old Name')] },
+    }), testOptions(), silentLogger).syncIsraeliPremierLeagueSquads();
+    await new SquadSyncService(db, fakeProvider({
+      teams: [team('1061', 'Maccabi Tel Aviv')], squads: { 1061: [player('10', 'New Name')] },
+    }), testOptions(), silentLogger).syncIsraeliPremierLeagueSquads();
+    expect(store.players[0]?.name).toBe('New Name');
+    expect(store.players[0]?.providerName).toBe('New Name');
   });
 
   it('updates the existing player teamId when the player transfers between league teams', async () => {

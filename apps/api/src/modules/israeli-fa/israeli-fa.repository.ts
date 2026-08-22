@@ -2,7 +2,7 @@ import { collections, type PlayerDocument, type TeamDocument } from '@ligat-fant
 import type { FootballPlayerSummary, FootballTeamSummary } from '@ligat-fantasy/contracts';
 import { ObjectId, type Db, type Filter } from 'mongodb';
 
-export interface FootballPlayerQuery {
+export interface IsraeliFaPlayerQuery {
   teamId?: string | undefined;
   position?: string | undefined;
   search?: string | undefined;
@@ -10,7 +10,7 @@ export interface FootballPlayerQuery {
   includeInactive?: boolean | undefined;
 }
 
-export class FootballRepository {
+export class IsraeliFaRepository {
   constructor(private readonly db: Db) {}
 
   async listTeams(): Promise<FootballTeamSummary[]> {
@@ -32,7 +32,7 @@ export class FootballRepository {
     return this.db.collection<TeamDocument>(collections.teams).findOne({ _id: new ObjectId(teamId) });
   }
 
-  async listPlayers(query: FootballPlayerQuery): Promise<FootballPlayerSummary[]> {
+  async listPlayers(query: IsraeliFaPlayerQuery): Promise<FootballPlayerSummary[]> {
     const filter = buildPlayerFilter(query);
     const players = await this.db.collection<PlayerDocument>(collections.players)
       .find(filter).sort({ name: 1 }).limit(500).toArray();
@@ -40,7 +40,7 @@ export class FootballRepository {
   }
 }
 
-export function buildPlayerFilter(query: FootballPlayerQuery): Filter<PlayerDocument> {
+export function buildPlayerFilter(query: IsraeliFaPlayerQuery): Filter<PlayerDocument> {
   const filter: Filter<PlayerDocument> = {};
   if (query.teamId) filter.teamId = new ObjectId(query.teamId);
   if (query.position) filter.position = query.position;

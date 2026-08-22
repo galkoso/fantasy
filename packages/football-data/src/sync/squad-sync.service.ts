@@ -24,7 +24,7 @@ export interface SquadSyncOptions {
 }
 
 interface StoredTeam { _id: ObjectId; name: string; providerIds: { israeliFa?: string } }
-type StoredPlayer = Pick<PlayerDocument, '_id' | 'name' | 'teamId' | 'birthDate' | 'providerIds'>;
+type StoredPlayer = Pick<PlayerDocument, '_id' | 'name' | 'providerName' | 'teamId' | 'birthDate' | 'providerIds'>;
 
 export class SquadSyncService {
   private running = false;
@@ -171,6 +171,8 @@ export class SquadSyncService {
 export interface ResolvedPlayer extends ExternalPlayer {
   teamId: ObjectId;
   existingId?: ObjectId;
+  storedName?: string;
+  storedProviderName?: string;
 }
 
 export function validateTeams(teams: ExternalTeam[], minTeams = MIN_LEAGUE_TEAMS): ExternalTeam[] {
@@ -258,7 +260,13 @@ export function resolvePlayers(
   for (const player of fetched) {
     const match = matchExisting(player, byProvider, byNameBirth, byName, used);
     if (match) used.add(match._id.toHexString());
-    resolved.push({ ...player, ...(match ? { existingId: match._id } : {}) });
+    resolved.push({
+      ...player,
+      ...(match ? {
+        existingId: match._id, storedName: match.name,
+        ...(match.providerName ? { storedProviderName: match.providerName } : {}),
+      } : {}),
+    });
   }
   return dedupeResolved(resolved);
 }
@@ -286,8 +294,10 @@ function matchExisting(
 
 function playerSetFields(player: ResolvedPlayer, now: Date) {
   const birthDate = player.birthDate ? parseBirthDate(player.birthDate) : undefined;
+  const displayName = pooledDisplayName(player.name, storedDisplay(player));
   return {
-    name: player.name, teamId: player.teamId, active: true as const, updatedAt: now, lastSyncedAt: now,
+    teamId: player.teamId, active: true as const, updatedAt: now, lastSyncedAt: now, providerName: player.name,
+    ...(displayName !== undefined ? { name: displayName } : {}),
     ...(player.externalId ? { providerIds: { israeliFa: player.externalId } } : {}),
     ...(player.shirtNumber !== undefined ? { shirtNumber: player.shirtNumber } : {}),
     ...(player.position ? { position: player.position } : {}),
@@ -296,6 +306,22 @@ function playerSetFields(player: ResolvedPlayer, now: Date) {
     ...(player.age !== undefined ? { age: player.age } : {}),
     ...(player.photo ? { photo: player.photo } : {}),
   };
+}
+
+export function pooledDisplayName(
+  incomingName: string,
+  stored?: { name: string; providerName?: string },
+): string | undefined {
+  if (!stored) return incomingName;
+  const customized = stored.providerName === undefined
+    ? stored.name !== incomingName
+    : stored.name !== stored.providerName;
+  return customized ? undefined : incomingName;
+}
+
+function storedDisplay(player: ResolvedPlayer): { name: string; providerName?: string } | undefined {
+  if (!player.storedName) return undefined;
+  return { name: player.storedName, ...(player.storedProviderName ? { providerName: player.storedProviderName } : {}) };
 }
 
 function writeBreakdown(result: { matchedCount: number; upsertedCount: number }): { created: number; updated: number } {

@@ -2,32 +2,27 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import type { FootballPlayerFilters, FootballPlayerSummary, FootballTeamSummary, SquadSyncResult } from '@ligat-fantasy/contracts';
 import type { Observable } from 'rxjs';
-import { buildPlayersParams, footballMeUrl, footballPlayersUrl, footballSyncSquadsUrl, footballTeamPlayersUrl, footballTeamsUrl } from './football-api.paths';
+import { buildPlayersParams, israeliFaPlayersUrl, israeliFaSyncSquadsUrl, israeliFaTeamPlayersUrl, israeliFaTeamsUrl } from './israeli-fa.paths';
 
-export interface CurrentUser { id: string; isAdmin: boolean }
-
+/** Reads Ligat Winner squads stored from the Israeli FA (ההתאחדות לכדורגל). Never calls football.org.il. */
 @Injectable({ providedIn: 'root' })
-export class FootballApiService {
+export class IsraeliFaService {
   private readonly http = inject(HttpClient);
 
   getTeams(): Observable<FootballTeamSummary[]> {
-    return this.http.get<FootballTeamSummary[]>(footballTeamsUrl());
+    return this.http.get<FootballTeamSummary[]>(israeliFaTeamsUrl());
   }
 
   getPlayersByTeam(teamId: string): Observable<FootballPlayerSummary[]> {
-    return this.http.get<FootballPlayerSummary[]>(footballTeamPlayersUrl(teamId));
+    return this.http.get<FootballPlayerSummary[]>(israeliFaTeamPlayersUrl(teamId));
   }
 
   getPlayers(filters: FootballPlayerFilters = {}): Observable<FootballPlayerSummary[]> {
-    return this.http.get<FootballPlayerSummary[]>(footballPlayersUrl(), { params: toHttpParams(buildPlayersParams(filters)) });
-  }
-
-  getCurrentUser(): Observable<CurrentUser> {
-    return this.http.get<CurrentUser>(footballMeUrl());
+    return this.http.get<FootballPlayerSummary[]>(israeliFaPlayersUrl(), { params: toHttpParams(buildPlayersParams(filters)) });
   }
 
   syncSquads(): Observable<SquadSyncResult> {
-    return this.http.post<SquadSyncResult>(footballSyncSquadsUrl(), {});
+    return this.http.post<SquadSyncResult>(israeliFaSyncSquadsUrl(), {});
   }
 }
 

@@ -47,9 +47,6 @@ importers:
       '@ligat-fantasy/database':
         specifier: workspace:*
         version: link:../../packages/database
-      '@ligat-fantasy/football-data':
-        specifier: workspace:*
-        version: link:../../packages/football-data
       fastify:
         specifier: ^5.5.0
         version: 5.12.0
@@ -59,6 +56,43 @@ importers:
       zod:
         specifier: ^4.0.17
         version: 4.4.3
+    devDependencies:
+      '@ligat-fantasy/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
+      '@types/node':
+        specifier: ^24.3.0
+        version: 24.13.3
+      tsx:
+        specifier: ^4.20.5
+        version: 4.23.12
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.7(@types/node@24.13.3)(lightningcss@1.33.0)(sass@1.101.0)(tsx@4.23.12)
+
+  apps/israeliFaPooling:
+    dependencies:
+      '@fastify/cors':
+        specifier: ^11.1.0
+        version: 11.3.0
+      '@ligat-fantasy/config':
+        specifier: workspace:*
+        version: link:../../packages/config
+      '@ligat-fantasy/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
+      '@ligat-fantasy/database':
+        specifier: workspace:*
+        version: link:../../packages/database
+      '@ligat-fantasy/football-data':
+        specifier: workspace:*
+        version: link:../../packages/football-data
+      fastify:
+        specifier: ^5.5.0
+        version: 5.12.0
+      mongodb:
+        specifier: ^6.18.0
+        version: 6.21.0(socks@2.8.9)
     devDependencies:
       '@ligat-fantasy/typescript-config':
         specifier: workspace:*

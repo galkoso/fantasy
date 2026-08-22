@@ -4,29 +4,30 @@ import type { PlayerDocument, TeamDocument } from '@ligat-fantasy/database';
 import { ObjectId, type Db, type Filter } from 'mongodb';
 import { afterEach, describe, expect, it } from 'vitest';
 import { buildApp } from '../../app.js';
+import { IsraeliFaService } from './israeli-fa.service.js';
 
 const teamId = new ObjectId();
 const otherTeamId = new ObjectId();
 const playerId = new ObjectId();
 const inactiveId = new ObjectId();
 
-describe('football HTTP routes', () => {
+describe('Israeli FA HTTP routes', () => {
   let app: FastifyInstance | undefined;
 
   afterEach(async () => { if (app) await app.close(); });
 
-  it('GET /api/football/teams returns active teams with player counts', async () => {
+  it('GET /api/israeli-fa/teams returns active teams with player counts', async () => {
     app = await buildTestApp();
-    const response = await app.inject({ method: 'GET', url: '/api/football/teams' });
+    const response = await app.inject({ method: 'GET', url: '/api/israeli-fa/teams' });
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual([
       { id: teamId.toHexString(), name: 'Maccabi Tel Aviv', logo: 'mta.png', playerCount: 1 },
     ]);
   });
 
-  it('GET /api/football/teams/:teamId/players returns active squad players', async () => {
+  it('GET /api/israeli-fa/teams/:teamId/players returns active squad players', async () => {
     app = await buildTestApp();
-    const response = await app.inject({ method: 'GET', url: `/api/football/teams/${teamId.toHexString()}/players` });
+    const response = await app.inject({ method: 'GET', url: `/api/israeli-fa/teams/${teamId.toHexString()}/players` });
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual([
       {
@@ -36,32 +37,15 @@ describe('football HTTP routes', () => {
     ]);
   });
 
-  it('GET /api/football/players supports team, position, and search filters', async () => {
+  it('GET /api/israeli-fa/players supports team, position, and search filters', async () => {
     app = await buildTestApp();
     const response = await app.inject({
       method: 'GET',
-      url: `/api/football/players?teamId=${teamId.toHexString()}&position=MIDFIELDER&search=peretz`,
+      url: `/api/israeli-fa/players?teamId=${teamId.toHexString()}&position=MIDFIELDER&search=peretz`,
     });
     expect(response.statusCode).toBe(200);
     expect(response.json()).toHaveLength(1);
     expect(response.json()[0].name).toBe('Dor Peretz');
-  });
-
-  it('POST /api/admin/football/sync-squads returns sync statistics for an admin', async () => {
-    app = await buildTestApp();
-    const response = await app.inject({
-      method: 'POST', url: '/api/admin/football/sync-squads', headers: { 'x-user-id': 'local-demo-user' },
-    });
-    expect(response.statusCode).toBe(200);
-    expect(response.json()).toMatchObject({ teamsFetched: 14, playersFetched: 367, failedTeams: [] });
-  });
-
-  it('POST /api/admin/football/sync-squads rejects a non-admin user', async () => {
-    app = await buildTestApp();
-    const response = await app.inject({
-      method: 'POST', url: '/api/admin/football/sync-squads', headers: { 'x-user-id': 'not-admin' },
-    });
-    expect(response.statusCode).toBe(403);
   });
 });
 
@@ -89,15 +73,11 @@ async function buildTestApp(): Promise<FastifyInstance> {
       active: false, createdAt: now, updatedAt: now, lastSyncedAt: now,
     },
   ];
+  const db = memoryDb(teams, players);
   return buildApp({
-    db: memoryDb(teams, players),
+    db,
     config: loadConfig({ ADMIN_USER_IDS: 'local-demo-user' }),
-    syncIsraeliPremierLeagueSquads: async () => ({
-      leagueName: 'ליגת WINNER', season: '2026/2027',
-      teamsFetched: 14, teamsCreated: 0, teamsUpdated: 14,
-      playersFetched: 367, playersCreated: 6, playersUpdated: 361, playersDeactivated: 4,
-      failedTeams: [], durationMs: 12,
-    }),
+    israeliFa: new IsraeliFaService(db),
   });
 }
 

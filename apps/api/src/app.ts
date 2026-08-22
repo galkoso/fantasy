@@ -1,18 +1,17 @@
 import cors from '@fastify/cors';
 import Fastify, { type FastifyInstance } from 'fastify';
 import type { AppConfig } from '@ligat-fantasy/config';
-import type { SquadSyncResult } from '@ligat-fantasy/contracts';
 import type { Db } from 'mongodb';
 import { ZodError } from 'zod';
-import { registerFootballRoutes } from './modules/football/football.routes.js';
-import { registerAdminFootballRoutes } from './modules/admin/admin-football.routes.js';
+import { registerIsraeliFaRoutes } from './modules/israeli-fa/israeli-fa.routes.js';
+import type { IsraeliFaService } from './modules/israeli-fa/israeli-fa.service.js';
 import { isAdminUser } from './shared/require-admin.js';
 import { requestUserId } from './shared/request-user.js';
 
 export interface AppContext {
   db: Db;
   config: AppConfig;
-  syncIsraeliPremierLeagueSquads: () => Promise<SquadSyncResult>;
+  israeliFa: IsraeliFaService;
 }
 
 export async function buildApp(context: AppContext): Promise<FastifyInstance> {
@@ -30,7 +29,6 @@ export async function buildApp(context: AppContext): Promise<FastifyInstance> {
     const id = requestUserId(request);
     return { id, isAdmin: isAdminUser(request, context.config) };
   });
-  await app.register(async (instance) => registerFootballRoutes(instance, context), { prefix: '/api/football' });
-  await app.register(async (instance) => registerAdminFootballRoutes(instance, context), { prefix: '/api/admin/football' });
+  await app.register(async (instance) => registerIsraeliFaRoutes(instance, context), { prefix: '/api/israeli-fa' });
   return app;
 }

@@ -5,6 +5,8 @@ const environmentSchema = z.object({
   MONGODB_URI: z.string().default('mongodb://localhost:27017/ligat_fantasy'),
   API_PORT: z.coerce.number().int().positive().default(3000),
   API_HOST: z.string().default('0.0.0.0'),
+  ISRAELI_FA_POOLING_PORT: z.coerce.number().int().positive().default(3001),
+  ISRAELI_FA_POOLING_HOST: z.string().default('0.0.0.0'),
   ISRAELI_FA_BASE_URL: z.url().default('https://www.football.org.il'),
   ISRAELI_FA_REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().default(15_000),
   ISRAELI_FA_REQUEST_DELAY_MS: z.coerce.number().int().nonnegative().default(1_500),
