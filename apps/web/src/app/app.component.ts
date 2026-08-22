@@ -1,14 +1,11 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { DashboardComponent } from './features/dashboard/dashboard.component';
-import { SquadBuilderComponent } from './features/squad-builder/squad-builder.component';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'lf-root',
-  imports: [DashboardComponent, SquadBuilderComponent],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {
-  readonly activeView = signal<'team' | 'dashboard'>('team');
-}
+export class AppComponent {}

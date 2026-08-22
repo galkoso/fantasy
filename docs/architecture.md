@@ -2,81 +2,35 @@
 
 ## Compiler versions
 
-Node, domain, worker, and shared packages compile with the explicit `typescript-7` 7.0.2 binary.
+Node and shared packages compile with the explicit `typescript-7` 7.0.2 binary.
 The Angular application and ESLint parser use TypeScript 6.0.3 because Angular 22.1 officially
-requires TypeScript `>=6.0 <6.1`. Keeping this compiler local to `apps/web` avoids disabling
-Angular's version safety check while the remainder of the monorepo uses TypeScript 7.
-
-## Reference constraint
-
-The requested Zapp monorepo was not present in the provided workspace when this project was
-created. The repository was empty. The implementation therefore applies the described Zapp
-principles—small modules, explicit boundaries, shared configuration, focused repositories,
-and independently runnable apps—without claiming parity with unavailable source conventions.
+requires TypeScript `>=6.0 <6.1`.
 
 ## Flow
 
-API-Football is accessed only through `FootballDataProvider`. The worker normalizes responses
-into clubs, players, fixtures, and player match statistics. Pure scoring consumes normalized
-statistics and persists a separate point breakdown. Fastify reads internal data and publishes
-gameweek changes through SSE; browsers never poll the provider.
+The official Israeli FA website is accessed only from the backend, behind `FootballDataProvider`.
+`IsraeliFaProvider` fetches Ligat Winner pages, parsers emit normalized DTOs, and `SquadSyncService`
+upserts them into MongoDB. Angular reads REST data from MongoDB and never calls football.org.il.
 
-## Data ownership
-
-- Provider data: external IDs and normalized match facts.
-- Fantasy data: prices, rules, points, gameweeks, snapshots, and rankings.
-- User data: account, current team, transfers, and league membership.
-
-Application IDs are independent from provider IDs. Repeated syncs are upserts and finalization
-is guarded by state, making worker operations retry-safe.
+```text
+football.org.il → IsraeliFaProvider → parsers → MongoDB → REST API → Angular /football/squads
+```
 
 ## Collections
 
 | Collection | Single responsibility | Important index |
 | --- | --- | --- |
-| `users` | identity and account data | unique email |
-| `clubs` | internal club records | unique provider ID |
-| `players` | current fantasy player catalog | club, position |
-| `fixtures` | normalized matches | gameweek/status/kickoff |
-| `player_match_stats` | normalized player facts per fixture | unique fixture + player |
-| `player_match_points` | calculated fantasy breakdown | unique fixture + player |
-| `gameweeks` | deadlines and lifecycle | unique season + number |
-| `fantasy_teams` | current squad, bank, and team state | unique user |
-| `gameweek_team_snapshots` | immutable submitted lineup | unique gameweek + team |
-| `gameweek_user_scores` | provisional/final gameweek result | unique gameweek + team |
-| `transfers` | permanent transfer audit | team + created time |
-| `player_price_history` | historical price changes | player + effective time |
-| `fantasy_leagues` | private league metadata | unique join code |
-| `fantasy_league_members` | league membership/ranking | unique league + team |
+| `teams` | Ligat Winner clubs | unique partial `providerIds.israeliFa`, `active` |
+| `players` | squad members | unique partial `providerIds.israeliFa`, `teamId`, `active`, `position`, `name` |
 
-Embedding the 15 current memberships in `fantasy_teams` makes atomic squad replacement and
-the primary read cheap. Historical ownership belongs in snapshots and transfers.
+Application `_id` values are MongoDB ObjectIds. Israeli FA `team_id` / `player_id` values stay under
+`providerIds.israeliFa`. Repeated syncs are bulk upserts. Players missing from a successful squad
+fetch are marked `active: false` instead of being deleted. Empty or implausibly small scrapes abort
+without mass deactivation.
 
-## Concurrency
+## Synchronization
 
-Transfers use a MongoDB transaction and optimistic `version` match. Point writes are upserts.
-Gameweek snapshot creation uses a unique index, so retries cannot create duplicate submissions.
-
-## Phasing
-
-This baseline implements the Phase 1 vertical slice and domain-ready foundations. Authentication
-is represented by a local development user header until an identity provider is selected.
-Price automation is implemented as an original configurable market algorithm; chip activation and
-Free Hit restoration remain isolated Phase 2 capabilities.
-
-## Gameweek processing
-
-The worker creates Gameweeks from provider round numbers and locks them at the first fixture
-deadline. It snapshots every complete team, recalculates provisional scores while fixtures are
-live, and finalizes once every fixture is complete. Final effects use per-team processed-Gameweek
-markers so free-transfer rollover and overall totals are safe to retry after a process failure.
-
-Team-score calculation is framework-free. It applies ordered legal substitutions, goalkeeper-only
-replacement, captain fallback, Bench Boost, Triple Captain, and transfer deductions to immutable
-snapshot data. Live totals are persisted before an SSE event is published.
-
-## Market processing
-
-Ownership and transfer aggregates are produced asynchronously by the worker. The configurable
-market engine changes prices by at most one integer unit per run and records dated price history;
-it is an original demand-based algorithm and does not claim to reproduce FPL's private algorithm.
+`SquadSyncService.syncIsraeliPremierLeagueSquads()` runs at API startup and daily at
+`SQUAD_SYNC_HOUR_UTC` (default 02:00 UTC). Admins can also trigger it with
+`POST /api/admin/football/sync-squads`. One failed team squad request does not abort the rest of the
+run. League discovery failure aborts the run.

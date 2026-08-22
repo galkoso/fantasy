@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ResponseData xmlns="http://tempuri.org/">
+  <HtmlData>&lt;div class='league-table games-table'&gt;&lt;div class="table_row " data-team1='1064' data-team2='2182'&gt;&lt;span class="team-name-text"&gt;מכבי פ"ת&amp;nbsp;- &lt;/span&gt;&lt;span class="team-name-text"&gt;הפועל ק"ש&lt;/span&gt;&lt;/div&gt;&lt;div class="table_row " data-team1='1061' data-team2='1005'&gt;&lt;span class="team-name-text"&gt;מכבי ת"א&amp;nbsp;- &lt;/span&gt;&lt;span class="team-name-text"&gt;מכבי חיפה&lt;/span&gt;&lt;/div&gt;&lt;div class="table_row " data-team1='2171' data-team2='3595'&gt;&lt;span class="team-name-text"&gt;הפועל ב"ש&amp;nbsp;- &lt;/span&gt;&lt;span class="team-name-text"&gt;בית"ר י-ם&lt;/span&gt;&lt;/div&gt;&lt;div class="table_row " data-team1='1068' data-team2='2176'&gt;&lt;span class="team-name-text"&gt;מכבי נתניה&amp;nbsp;- &lt;/span&gt;&lt;span class="team-name-text"&gt;הפועל ת"א&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;</HtmlData>
+  <HaveLink>false</HaveLink>
+</ResponseData>

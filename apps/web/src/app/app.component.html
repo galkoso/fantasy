@@ -1,20 +1,15 @@
 <header class="topbar">
-  <button class="brand" (click)="activeView.set('team')" aria-label="Ligat Fantasy home">
+  <a class="brand" routerLink="/football/squads" aria-label="Ligat Fantasy home">
     <span class="brand-mark"><i></i><i></i><i></i></span>
     <span><strong>LIGAT</strong><small>FANTASY</small></span>
-  </button>
+  </a>
   <nav aria-label="Primary navigation">
-    <button [class.active]="activeView() === 'team'" (click)="activeView.set('team')">My Team</button>
-    <button [class.active]="activeView() === 'dashboard'" (click)="activeView.set('dashboard')">Overview</button>
-    <button>Players</button><button>Leagues</button>
+    <a routerLink="/football/squads" routerLinkActive="active">Squads</a>
   </nav>
-  <button class="profile"><span>GK</span><b>Gal's XI</b></button>
 </header>
 <main>
-  @if (activeView() === 'team') { <lf-squad-builder /> } @else { <lf-dashboard /> }
+  <router-outlet />
 </main>
 <nav class="mobile-nav" aria-label="Mobile navigation">
-  <button class="active" (click)="activeView.set('team')"><span>⌂</span>Team</button>
-  <button (click)="activeView.set('dashboard')"><span>◫</span>Overview</button>
-  <button><span>↕</span>Transfers</button><button><span>♜</span>Leagues</button>
+  <a routerLink="/football/squads" routerLinkActive="active"><span>♟</span>Squads</a>
 </nav>

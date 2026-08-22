@@ -2,23 +2,40 @@ import type { Db } from 'mongodb';
 import { collections as names } from './collections.js';
 
 export async function ensureIndexes(db: Db): Promise<void> {
+  const teams = db.collection(names.teams);
+  const players = db.collection(names.players);
   await Promise.all([
-    db.collection(names.users).createIndex({ email: 1 }, { unique: true }),
-    db.collection(names.clubs).createIndex({ 'providerIds.apiFootball': 1 }, { unique: true }),
-    db.collection(names.players).createIndexes([{ key: { clubId: 1 } }, { key: { position: 1 } }]),
-    db.collection(names.players).createIndex({ 'providerIds.apiFootball': 1 }, { unique: true }),
-    db.collection(names.fixtures).createIndexes([{ key: { gameweekId: 1 } }, { key: { status: 1, kickoffAt: 1 } }]),
-    db.collection(names.playerMatchStats).createIndex({ fixtureId: 1, playerId: 1 }, { unique: true }),
-    db.collection(names.playerMatchPoints).createIndex({ fixtureId: 1, playerId: 1 }, { unique: true }),
-    db.collection(names.gameweeks).createIndex({ season: 1, number: 1 }, { unique: true }),
-    db.collection(names.fantasyTeams).createIndex({ userId: 1 }, { unique: true }),
-    db.collection(names.snapshots).createIndex({ gameweekId: 1, fantasyTeamId: 1 }, { unique: true }),
-    db.collection(names.gameweekScores).createIndex({ gameweekId: 1, fantasyTeamId: 1 }, { unique: true }),
-    db.collection(names.transfers).createIndex({ fantasyTeamId: 1, createdAt: -1 }),
-    db.collection(names.priceHistory).createIndex({ playerId: 1, effectiveAt: -1 }),
-    db.collection(names.priceHistory).createIndex({ playerId: 1, dateKey: 1 }, { unique: true }),
-    db.collection(names.leagues).createIndex({ joinCode: 1 }, { unique: true }),
-    db.collection(names.leagueMembers).createIndex({ leagueId: 1, fantasyTeamId: 1 }, { unique: true }),
-    db.collection('live_events').createIndex({ expiresAt: 1 }, { expireAfterSeconds: 0 }),
+    dropIndex(teams, 'providerIds.apiFootball_1'),
+    dropIndex(teams, 'leagueId_1_season_1'),
+    dropIndex(players, 'providerIds.apiFootball_1'),
+    dropIndex(players, 'leagueId_1_season_1'),
+    dropIndex(players, 'leagueId_1_season_1_active_1'),
   ]);
+  await Promise.all([
+    teams.createIndexes([
+      {
+        key: { 'providerIds.israeliFa': 1 }, unique: true,
+        partialFilterExpression: { 'providerIds.israeliFa': { $type: 'string' } },
+      },
+      { key: { active: 1 } },
+    ]),
+    players.createIndexes([
+      {
+        key: { 'providerIds.israeliFa': 1 }, unique: true,
+        partialFilterExpression: { 'providerIds.israeliFa': { $type: 'string' } },
+      },
+      { key: { teamId: 1 } },
+      { key: { active: 1 } },
+      { key: { position: 1 } },
+      { key: { name: 1 } },
+    ]),
+  ]);
+}
+
+async function dropIndex(collection: { dropIndex(name: string): Promise<unknown> }, name: string): Promise<void> {
+  try {
+    await collection.dropIndex(name);
+  } catch {
+    return;
+  }
 }

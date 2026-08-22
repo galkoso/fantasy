@@ -5,13 +5,14 @@ const environmentSchema = z.object({
   MONGODB_URI: z.string().default('mongodb://localhost:27017/ligat_fantasy'),
   API_PORT: z.coerce.number().int().positive().default(3000),
   API_HOST: z.string().default('0.0.0.0'),
-  API_FOOTBALL_KEY: z.string().default(''),
-  API_FOOTBALL_BASE_URL: z.url().default('https://v3.football.api-sports.io'),
-  API_FOOTBALL_LEAGUE_ID: z.coerce.number().int().positive().default(383),
-  API_FOOTBALL_SEASON: z.coerce.number().int().default(2026),
-  LIVE_FIXTURE_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(60_000),
-  PLAYER_STATS_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(180_000),
-  SSE_HEARTBEAT_INTERVAL_MS: z.coerce.number().int().positive().default(15_000),
+  ISRAELI_FA_BASE_URL: z.url().default('https://www.football.org.il'),
+  ISRAELI_FA_REQUEST_TIMEOUT_MS: z.coerce.number().int().positive().default(15_000),
+  ISRAELI_FA_REQUEST_DELAY_MS: z.coerce.number().int().nonnegative().default(1_500),
+  ISRAELI_FA_LEAGUE_ID: z.string().default('40'),
+  SQUAD_SYNC_INTERVAL_MS: z.coerce.number().int().positive().default(86_400_000),
+  SQUAD_SYNC_HOUR_UTC: z.coerce.number().int().min(0).max(23).default(2),
+  ADMIN_USER_IDS: z.string().default('local-demo-user').transform((value) =>
+    value.split(',').map((id) => id.trim()).filter((id) => id.length > 0)),
   WEB_ORIGIN: z.string().default('http://localhost:4200'),
 });
 

@@ -1,0 +1,87 @@
+<section class="hero">
+  <div>
+    <span class="eyebrow">LIGAT WINNER</span>
+    <h1>Ligat Winner</h1>
+    <p>Current Israeli Premier League teams and squads.</p>
+  </div>
+  @if (isAdmin()) {
+    <button class="refresh" (click)="refreshSquads()" [disabled]="syncing()">
+      @if (syncing()) { Refreshing… } @else { Refresh squads }
+    </button>
+  }
+</section>
+
+@if (syncMessage()) { <p class="sync-msg">{{ syncMessage() }}</p> }
+
+<div class="workspace">
+  <aside class="teams-panel">
+    <div class="panel-head">
+      <div>
+        <h2>Teams</h2>
+        <p>{{ teams().length }} clubs this season</p>
+      </div>
+    </div>
+    @if (loadingTeams()) { <p class="state">Loading teams…</p> }
+    @else if (teamsError()) { <p class="state error">{{ teamsError() }}</p> }
+    @else if (teams().length === 0) { <p class="state">No teams yet. Ask an admin to run Refresh squads.</p> }
+    @else {
+      <ul class="team-list">
+        @for (team of teams(); track team.id) {
+          <li>
+            <button [class.active]="team.id === selectedTeamId()" (click)="selectTeam(team.id)">
+              <span class="logo">
+                @if (team.logo) { <img [src]="team.logo" [alt]="team.name" (error)="onImageError($event)" /> }
+              </span>
+              <span class="identity">
+                <b>{{ team.name }}</b>
+                <small>{{ team.playerCount }} players</small>
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  </aside>
+
+  <section class="squad-panel">
+    <div class="panel-head">
+      <div>
+        <h2>{{ selectedTeam()?.name ?? 'Select a team' }}</h2>
+        <p>@if (selectedTeam(); as team) { {{ team.playerCount }} players in the current squad } @else { Choose a club to view its squad }</p>
+      </div>
+    </div>
+    <div class="filters">
+      <label class="search">
+        <span>Search</span>
+        <input type="search" placeholder="Search player..." (input)="setSearch($event)" />
+      </label>
+      <div class="positions" role="group" aria-label="Position filter">
+        @for (option of positions; track option.value) {
+          <button type="button" [class.active]="position() === option.value" (click)="setPosition(option.value)">{{ option.label }}</button>
+        }
+      </div>
+    </div>
+    @if (loadingPlayers() || syncing()) { <p class="state">Loading squad…</p> }
+    @else if (playersError()) { <p class="state error">{{ playersError() }}</p> }
+    @else if (!selectedTeamId()) { <p class="state">Select a team to view its squad.</p> }
+    @else if (squad().length === 0) { <p class="state">No players in this squad.</p> }
+    @else if (players().length === 0) { <p class="state">No players match these filters.</p> }
+    @else {
+      <ul class="player-list">
+        @for (player of players(); track player.id) {
+          <li>
+            <span class="number">@if (player.number !== undefined) { {{ player.number }} }</span>
+            <span class="photo">
+              @if (player.photo) { <img [src]="player.photo" [alt]="player.name" (error)="onImageError($event)" /> }
+            </span>
+            <span class="identity">
+              <b>{{ player.name }}</b>
+              @if (positionLabel(player.position); as label) { <small>{{ label }}</small> }
+            </span>
+            <span class="age">@if (player.age !== undefined) { Age {{ player.age }} }</span>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>
