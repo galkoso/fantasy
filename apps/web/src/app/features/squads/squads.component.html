@@ -71,13 +71,10 @@
         @for (player of players(); track player.id) {
           <li>
             <span class="number">@if (player.number !== undefined) { {{ player.number }} }</span>
-            <span class="photo">
-              @if (player.photo) { <img [src]="player.photo" [alt]="player.name" (error)="onImageError($event)" /> }
-            </span>
             <span class="identity">
               <b>{{ player.name }}</b>
-              @if (positionLabel(player.position); as label) { <small>{{ label }}</small> }
             </span>
+            <span class="position">{{ positionLabel(player.position) ?? '—' }}</span>
             <span class="age">@if (player.age !== undefined) { Age {{ player.age }} }</span>
           </li>
         }
